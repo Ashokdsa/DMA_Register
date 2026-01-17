@@ -1,6 +1,3 @@
-`include "dma_reg_pkg.svh"
-import dma_reg_pkg::*;
-
 class intr_reg extends uvm_reg;
   `uvm_object_utils(intr_reg)
   rand uvm_reg_field intr_mask;
