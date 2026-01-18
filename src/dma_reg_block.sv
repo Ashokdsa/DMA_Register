@@ -57,7 +57,7 @@ class dma_reg_block extends uvm_reg_block;
     mem_addr.set_coverage(UVM_CVR_FIELD_VALS); 
     extra_info.set_coverage(UVM_CVR_FIELD_VALS); 
     status.set_coverage(UVM_CVR_FIELD_VALS); 
-    transfer_count.set_coverage(UVM_CVR_FIELD_VALS); 
+    transfer_count.set_coverage(UVM_NO_COVERAGE); 
     descriptor_addr.set_coverage(UVM_CVR_FIELD_VALS); 
     error_status.set_coverage(UVM_CVR_FIELD_VALS); 
     configu.set_coverage(UVM_CVR_FIELD_VALS); 

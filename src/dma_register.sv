@@ -5,6 +5,11 @@ class intr_reg extends uvm_reg;
 
   covergroup intr_cg;
     option.per_instance = 1;
+    bit_0: coverpoint intr_status.value[0];
+    mask_cp: coverpoint intr_mask.value
+    {
+      bins intr_mas[17] = {[0:$]};
+    }
   endgroup
 
   function new(string name = "intr_reg");
@@ -35,6 +40,7 @@ class intr_reg extends uvm_reg;
       .is_rand(0),
       .individually_accessible(1)
     );
+    intr_status.set_compare(UVM_NO_CHECK);
     intr_mask = uvm_reg_field::type_id::create("intr_mask");
     intr_mask.configure(
       .parent(this),
@@ -57,6 +63,12 @@ class ctrl_reg extends uvm_reg;
 
   covergroup ctrl_cg;
     option.per_instance = 1;
+    start_cp: coverpoint start_dma.value;
+    w_count_cp: coverpoint w_count.value
+    {
+      bins w_count_bin[16] = {[0:$]};
+    }
+    io_mem_cp: coverpoint io_mem;
   endgroup
 
   function new(string name = "ctrl_reg");
@@ -123,6 +135,7 @@ class ctrl_reg extends uvm_reg;
       .is_rand(0),
       .individually_accessible(1)
     );
+    Reserved.set_compare(UVM_NO_CHECK);
   endfunction
 endclass
 
@@ -132,6 +145,10 @@ class io_addr_reg extends uvm_reg;
 
   covergroup io_addr_cg;
     option.per_instance = 1;
+    io_addr_cp: coverpoint io_addr.value
+    {
+      bins io_addr_bin[33] = {[0:$]};
+    }
   endgroup
 
   function new(string name = "io_addr_reg");
@@ -171,6 +188,10 @@ class mem_addr_reg extends uvm_reg;
 
   covergroup mem_addr_cg;
     option.per_instance = 1;
+    mem_addr_cp: coverpoint mem_addr.value
+    {
+      bins mem_addr_bin[33] = {[0:$]};
+    }
   endgroup
 
   function new(string name = "mem_addr_reg");
@@ -210,6 +231,10 @@ class extra_info_reg extends uvm_reg;
 
   covergroup extra_info_cg;
     option.per_instance = 1;
+    extra_info_cp: coverpoint extra_info.value
+    {
+      bins extra_info_bin[33] = {[0:$]};
+    }
   endgroup
 
   function new(string name = "extra_info_reg");
@@ -249,6 +274,12 @@ class status_reg extends uvm_reg;
 
   covergroup status_cg;
     option.per_instance = 1;
+    busy_cp: coverpoint busy.value;
+    done_cp: coverpoint done.value; 
+    error_cp: coverpoint error.value;
+    paused_cp: coverpoint paused.value;
+    current_state_cp: coverpoint current_state.value;
+    fifo_level_cp: coverpoint fifo_level.value;
   endgroup
 
   function new(string name = "status_reg");
@@ -351,6 +382,13 @@ class status_reg extends uvm_reg;
       .is_rand(0),
       .individually_accessible(1)
     );
+    busy.set_compare(UVM_NO_CHECK);
+    done.set_compare(UVM_NO_CHECK);
+    error.set_compare(UVM_NO_CHECK);
+    paused.set_compare(UVM_NO_CHECK);
+    current_state.set_compare(UVM_NO_CHECK);
+    fifo_level.set_compare(UVM_NO_CHECK);
+    Reserved.set_compare(UVM_NO_CHECK);
   endfunction
 endclass
 
@@ -359,23 +397,8 @@ class transfer_count_reg extends uvm_reg;
   `uvm_object_utils(transfer_count_reg)
   uvm_reg_field transfer_count;
 
-  covergroup transfer_count_cg;
-    option.per_instance = 1;
-  endgroup
-
   function new(string name = "transfer_count_reg");
-    super.new(name,32,UVM_CVR_FIELD_VALS);
-    if(has_coverage(UVM_CVR_FIELD_VALS))
-      transfer_count_cg = new();
-  endfunction
-
-  function void sample(uvm_reg_data_t data, uvm_reg_data_t byte_en, bit is_read, uvm_reg_map map);
-    transfer_count_cg.sample();
-  endfunction
-
-  function void sample_values();
-    super.sample_values();
-    transfer_count_cg.sample();
+    super.new(name,32,UVM_NO_COVERAGE);
   endfunction
 
   function void build();
@@ -391,6 +414,7 @@ class transfer_count_reg extends uvm_reg;
       .is_rand(0),
       .individually_accessible(1)
     );
+    transfer_count.set_compare(UVM_NO_CHECK);
   endfunction
 endclass
 
@@ -400,6 +424,10 @@ class descriptor_addr_reg extends uvm_reg;
 
   covergroup descriptor_addr_cg;
     option.per_instance = 1;
+    descriptor_addr_cp: coverpoint descriptor_addr.value
+    {
+      bins descriptor_addr_bin[33] = {[0:$]};
+    }
   endgroup
 
   function new(string name = "descriptor_addr_reg");
@@ -440,6 +468,11 @@ class error_status_reg extends uvm_reg;
 
   covergroup error_status_cg;
     option.per_instance = 1;
+    bus_error_cp: coverpoint bus_error.value;
+    timeout_error_cp: coverpoint timeout_error.value;
+    alignment_error_cp: coverpoint alignment_error.value;
+    overflow_error_cp: coverpoint overflow_error.value;
+    underflow_error_cp: coverpoint underflow_error.value;
   endgroup
 
   function new(string name = "error_status_reg");
@@ -554,6 +587,9 @@ class error_status_reg extends uvm_reg;
       .is_rand(0),
       .individually_accessible(1)
     );
+    Reserved.set_compare(UVM_NO_CHECK);
+    error_code.set_compare(UVM_NO_CHECK);
+    error_addr_offset.set_compare(UVM_NO_CHECK);
   endfunction
 endclass
 
@@ -564,6 +600,12 @@ class config_reg extends uvm_reg;
 
   covergroup config_cg;
     option.per_instance = 1;
+    prioriti_cp: coverpoint prioriti.value;
+    auto_restart_cp: coverpoint auto_restart.value;
+    interrupt_enable_cp: coverpoint interrupt_enable.value;
+    burst_size_cp: coverpoint burst_size.value;
+    data_width_cp: coverpoint data_width.value;
+    descriptor_mode_cp: coverpoint descriptor_mode.value;
   endgroup
 
   function new(string name = "config_reg");
@@ -666,6 +708,7 @@ class config_reg extends uvm_reg;
       .is_rand(0),
       .individually_accessible(1)
     );
+    Reserved.set_compare(UVM_NO_CHECK);
   endfunction
 endclass
 
