@@ -1,2 +1,2 @@
 ﻿# DMA_Register
-<img width="4387" height="2758" alt="DMA Architecture" src="https://github.com/user-attachments/assets/6968abb7-c111-4af1-83e3-1a57e8cd418a" />
+<img width="4387" height="2758" alt="DMA Architecture" src="https://github.com/user-attachments/assets/cdb98b4e-78af-4e79-b908-a0187a8b2d8e" />
