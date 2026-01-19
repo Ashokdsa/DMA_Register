@@ -27,8 +27,8 @@ class dma_base_sequence extends uvm_sequence#(dma_sequence_item); //BASE sequenc
     written = pread;
     while(written == pread)
       written = $urandom();
-    regi.write(status,written);
-    regi.mirror(status,read,UVM_BACKDOOR);
+    regi.write(status,written,UVM_BACKDOOR);
+    regi.mirror(status,read);
     if(read === pread)
       `uvm_info(regi.get_full_name,"IS A READ ONLY FIELD",UVM_NONE)
     else
