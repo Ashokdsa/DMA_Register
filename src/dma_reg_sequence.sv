@@ -1,7 +1,7 @@
 class dma_base_sequence extends uvm_sequence#(dma_sequence_item); //BASE sequence
   `uvm_object_utils(dma_base_sequence)    //Factory Registration
   dma_sequence_item seq;
-  dma_block dma_model;
+  dma_reg_block dma_model;
   bit[31:0] written_addr,read;
 
   function new(string name = "dma_base_sequence");
@@ -12,33 +12,67 @@ class dma_base_sequence extends uvm_sequence#(dma_sequence_item); //BASE sequenc
     `uvm_fatal(get_name,"NOT EXTENDED")
   endtask
 
-  task rst_compare(uvm a);
+  task rst_compare(uvm_reg a);
     a.read(status,read,UVM_BACKDOOR);
-    read = a.get_mirrored_value();
-    if(read == 31'h00000000)
+    if(read == 32'h00000000)
       `uvm_info(a.get_name,"RESET WORKS HERE",UVM_NONE)
+    else
+      `uvm_warning(a.get_name,"RESET VALUE DIFFERS")
+
   endtask
 
-  task write_and_mirror_field(uvm_field_reg regi, bit[31:0] val,output uvm__regstatus_e status);
-    regi.write(status,val);
-    regi.mirror(status,UVM_CHECK,UVM_BACKDOOR);
+  task check_RO(uvm_reg_field regi, uvm_reg_status_e status,int sz);
+    bit[sz-1:0] written,read,pread;
+    regi.read(status,pread,UVM_BACKDOOR);
+    written = pread;
+    while(written == pread)
+      written = $urandom();
+    regi.write(status,written);
+    regi.mirror(status,read,UVM_BACKDOOR);
+    if(read === pread)
+      `uvm_info(regi.get_full_name,"IS A READ ONLY FIELD",UVM_NONE)
+    else
+      `uvm_error(regi.get_full_name,"IS NOT A READ ONLY FIELD")
   endtask
 
-  task write_and_mirror(uvm_reg regi, bit[31:0] val,output uvm_regstatus_e status);
-    regi.write(status,val);
-    regi.mirror(status,UVM_CHECK,UVM_BACKDOOR);
+  task check_RW(uvm_reg_field regi, output uvm_reg_status_e status,int sz);
+    bit[sz-1:0] written,read,pread;
+    regi.read(status,pread,UVM_BACKDOOR);
+    written = pread;
+    while(written == pread)
+      written = $urandom();
+    regi.write(status,written);
+    regi.mirror(status,read,UVM_BACKDOOR);
+    if(read === written)
+      `uvm_info(regi.get_full_name,"IS A RW FIELD",UVM_NONE)
+    else
+      `uvm_error(regi.get_full_name,"IS NOT A RW FIELD")
+  endtask
+
+  task check_RW1C(uvm_reg_field regi, output uvm_reg_status_e status);
+    bit written,read,pread;
+    regi.read(status,pread,UVM_BACKDOOR);
+    written = pread;
+    while(written == pread)
+      written = $urandom();
+    regi.write(status,written);
+    regi.mirror(status,read,UVM_BACKDOOR);
+    if(written && !read)
+      `uvm_info(regi.get_full_name,"IS A RW1C FIELD",UVM_NONE)
+    else if(written && read)
+      `uvm_error(regi.get_full_name,"IS NOT A RW1C FIELD")
   endtask
 endclass
 
-class all_reset_sequence extends dma_base_sequence;
-  `uvm_object_utils(all_reset_sequence)    //Factory Registration
+class reset_all_sequence extends dma_base_sequence;
+  `uvm_object_utils(reset_all_sequence)    //Factory Registration
 
-  function new(string name = "all_reset_sequence");
+  function new(string name = "reset_all_sequence");
     super.new(name);
   endfunction:new
 
   task body();
-    uvm_status_e status;
+    uvm_reg_status_e status;
     dma_model.reset();
     // OR
     /*
@@ -77,14 +111,9 @@ class intr_sequence extends dma_base_sequence;
   task body();
     uvm_status_e status;
     dma_model.reset();
-    while(1)
-    begin
-      if(written >= 32'h8000)
-        break;
-      write_and_mirror_field(dma_model.intr.intr_mask,written,status);
-      if(written == 0)
-        written = 1;
-      else written = written << 1;
+    repeat(10) begin
+      check_RO(dma_model.intr.intr_status,status,16);
+      check_RW(dma_model.intr.intr_mask,status,16);
     end
   endtask
 
@@ -100,17 +129,11 @@ class ctrl_sequence extends dma_base_sequence;
   task body();
     uvm_status_e status;
     dma_model.reset();
-    while(1)
-    begin
-      write_and_mirror(dma_model.ctrl,written,status);
-      written[0] = ~written[0];
-      written[16] = ~written[16];
-      if(written[15:1] == 0)
-        written[15:1] = 15'd1;
-      else if(written[15:1] == 16'h4000)
-        break;
-      else
-        written[15:1] = written[15:1] << 1;
+    repeat(10) begin
+      check_RW(dma_model.ctrl.start_dma,status,1);
+      check_RW(dma_model.ctrl.w_count,status,15);
+      check_RW(dma_model.ctrl.io_mem,status,1);
+      check_RO(dma_model.ctrl.Reserved,status,15);
     end
   endtask
 
@@ -126,15 +149,8 @@ class io_addr_sequence extends dma_base_sequence;
   task body();
     uvm_status_e status;
     dma_model.reset();
-    while(1)
-    begin
-      write_and_mirror(dma_model.io_addr,written,status);
-      if(written == 0)
-        written = 15'd1;
-      else if(written == 32'h80000000)
-        break;
-      else
-        written = written << 1;
+    repeat(10) begin
+      check_RW(dma_model.io_addr.io_addr,status,32);
     end
   endtask
 
@@ -150,21 +166,13 @@ class mem_addr_sequence extends dma_base_sequence;
   task body();
     uvm_status_e status;
     dma_model.reset();
-    while(1)
-    begin
-      write_and_mirror(dma_model.mem_addr,written,status);
-      if(written == 0)
-        written = 15'd1;
-      else if(written == 32'h80000000)
-        break;
-      else
-        written = written << 1;
+    repeat(10) begin
+      check_RW(dma_model.mem_addr.mem_addr,status,32);
     end
   endtask
 
 endclass
 
-//NOT DEFINED
 class status_sequence extends dma_base_sequence;
   `uvm_object_utils(status_sequence)    //Factory Registration
 
@@ -175,6 +183,15 @@ class status_sequence extends dma_base_sequence;
   task body();
     uvm_status_e status;
     dma_model.reset();
+    repeat(10) begin
+      check_RO(dma_model.status.busy,status,1);
+      check_RO(dma_model.status.done,status,1);
+      check_RO(dma_model.status.error,status,1);
+      check_RO(dma_model.status.paused,status,1);
+      check_RO(dma_model.status.current_state,status,4);
+      check_RO(dma_model.status.fifo_level,status,8);
+      check_RO(dma_model.status.Reserved,status,16);
+    end
   endtask
 
 endclass
@@ -189,15 +206,8 @@ class extra_info_sequence extends dma_base_sequence;
   task body();
     uvm_status_e status;
     dma_model.reset();
-    while(1)
-    begin
-      write_and_mirror(dma_model.extra_info,written,status);
-      if(written == 0)
-        written = 15'd1;
-      else if(written == 32'h80000000)
-        break;
-      else
-        written = written << 1;
+    repeat(10) begin
+      check_RW(dma_model.extra_info.extra_info,status,32);
     end
   endtask
 
@@ -214,6 +224,9 @@ class transfer_count_sequence extends dma_base_sequence;
   task body();
     uvm_status_e status;
     dma_model.reset();
+    repeat(10) begin
+      check_RO(dma_model.transfer_count.transfer_count,status,32);
+    end
   endtask
 
 endclass
@@ -228,15 +241,8 @@ class descriptor_addr_sequence extends dma_base_sequence;
   task body();
     uvm_status_e status;
     dma_model.reset();
-    while(1)
-    begin
-      write_and_mirror(dma_model.descriptor_addr,written,status);
-      if(written == 0)
-        written = 15'd1;
-      else if(written == 32'h80000000)
-        break;
-      else
-        written = written << 1;
+    repeat(10) begin
+      check_RW(dma_model.descriptor_addr.descriptor_addr,status,32);
     end
   endtask
 
@@ -253,10 +259,15 @@ class error_status_sequence extends dma_base_sequence;
     uvm_status_e status;
     dma_model.reset();
 
-    while(written < 8'h20)
-    begin
-      write_and_mirror(dma_model.error_status,written,status);
-      written++;
+    repeat(10) begin
+      check_RW1C(dma_model.error_status.bus_error,status);
+      check_RW1C(dma_model.error_status.timeout_error,status);
+      check_RW1C(dma_model.error_status.alignment_error,status);
+      check_RW1C(dma_model.error_status.overflow_error,status);
+      check_RW1C(dma_model.error_status.underflow_error,status);
+      check_RO(dma_model.error_status.Reserved,status,3);
+      check_RO(dma_model.error_status.error_code,status,8);
+      check_RO(dma_model.error_status.error_addr_offset,status,16);
     end
   endtask
 
@@ -273,90 +284,14 @@ class config_sequence extends dma_base_sequence;
     uvm_status_e status;
     dma_model.reset();
 
-    while(written < 12'h200)
-    begin
-      write_and_mirror(dma_model.config,written,status);
-      written++;
+    repeat(10) begin
+      check_RW(dma_model.configu.prioriti,status,2);
+      check_RW(dma_model.configu.auto_restart,status,1);
+      check_RW(dma_model.configu.interrupt_enable,status,1);
+      check_RW(dma_model.configu.burst_size,status,2);
+      check_RW(dma_model.configu.data_width,status,2);
+      check_RW(dma_model.configu.descriptor_mode,status,1);
+      check_RO(dma_model.configu.Reserved,status,23);
     end
   endtask
-
 endclass
-
-//CONTINUE
-class normal_sequence extends dma_base_sequence;
-  `uvm_object_utils(normal_sequence)    //Factory Registration
-
-  function new(string name = "normal_sequence");
-    super.new(name);
-  endfunction:new
-
-  task body();
-    uvm_status_e status;
-    dma_model.reset();
-    //PROGRAM IO,MEM,CTRL,CONFIG
-    //START_DMA
-    write_and_mirror_field(dma_model.ctrl.start_dma,1,status);
-
-    //DMA ACTIVE
-    dma_model.status.busy.predict(1);
-    dma_model.status.busy.read(status,read,UVM_BACKDOOR);
-    if(read[0] == 1)
-      `uvm_info(get_name,"DMA IS BUSY",UVM_NONE)
-    else
-      `uvm_error(get_name,"DMA IS SHOWN AS NOT BUSY WHEN ACTIVE")
-
-
-    //MULTIPLE TRANSFERS increment transfer_count
-
-    //COMPLETION
-    dma_model.done.busy.predict(1);
-    dma_model.done.busy.read(status,read,UVM_BACKDOOR);
-    if(read[0] == 1)
-      `uvm_info(get_name,"DONE IS ASSERTED",UVM_NONE)
-    else
-      `uvm_error(get_name,"DONE IS NOT ASSERTED")
-
-    dma_model.intr.intr_status.predict(0);
-    dma_model.intr.intr_status.read(status,read,UVM_BACKDOOR)
-    if(read[0] == 1)
-      `uvm_info(get_name,"TRANSFER COMPLETED",UVM_NONE)
-    else
-      `uvm_error(get_name,"TRANSFER ISN'T COMPLETED")
-
-    dma_model.status.read(status,read,UVM_BACKDOOR);
-    if(read[2])
-    begin
-      `uvm_info(get_name,"ERROR DETECTED",UVM_NONE)
-      $display("------------------------------------TYPE OF ERRORS:------------------------------------\n");
-      dma_model.error_status.read(status,read,UVM_BACKDOOR);
-      if(read[0])
-        $display("BUS ERROR");
-      if(read[1])
-        $display("TIMEOUT ERROR");
-      if(read[2])
-        $display("ALIGNMENT ERROR");
-      if(read[3])
-        $display("OVERFLOW ERROR");
-      if(read[4])
-        $display("UNDERFLOW ERROR");
-    end
-
-  endtask
-
-endclass
-
-//YET TO
-class randomize_RW_sequence extends dma_base_sequence;
-  `uvm_object_utils(randomize_RW_sequence)    //Factory Registration
-
-  function new(string name = "randomize_RW_sequence");
-    super.new(name);
-  endfunction:new
-
-  task body();
-    uvm_status_e status;
-    dma_model.reset();
-  endtask
-
-endclass
-

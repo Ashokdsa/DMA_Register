@@ -16,6 +16,7 @@ class dma_reg_block extends uvm_reg_block;
   endfunction
 
   function void build();
+    add_hdl_path ("dut", "RTL");
     uvm_reg::include_coverage("*", UVM_CVR_ALL);
 
     intr = intr_reg::type_id::create("intr");
@@ -61,6 +62,17 @@ class dma_reg_block extends uvm_reg_block;
     descriptor_addr.set_coverage(UVM_CVR_FIELD_VALS); 
     error_status.set_coverage(UVM_CVR_FIELD_VALS); 
     configu.set_coverage(UVM_CVR_FIELD_VALS); 
+
+    intr.add_hdl_path_slice("intr",400, 32);
+    ctrl.add_hdl_path_slice("ctrl",404, 32);
+    io_addr.add_hdl_path_slice("io_addr",408, 32);
+    mem_addr.add_hdl_path_slice("mem_addr",40C, 32);
+    extra_info.add_hdl_path_slice("extra_info",410, 32);
+    status.add_hdl_path_slice("status",414, 32);
+    transfer_count.add_hdl_path_slice("transfer_count",418, 32);
+    descriptor_addr.add_hdl_path_slice("descriptor_addr",41C, 32);
+    error_status.add_hdl_path_slice("error_status",420, 32);
+    configu.add_hdl_path_slice("configu",424, 32);
 
     default_map = create_map("default_map", 'h400, 4, UVM_LITTLE_ENDIAN);
 

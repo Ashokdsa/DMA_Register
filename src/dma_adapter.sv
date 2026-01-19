@@ -1,5 +1,5 @@
 class adapter extends uvm_reg_adapter;
-  `uvm_oject_utils(adapter)
+  `uvm_object_utils(adapter)
 
   function new(string name = "adapter");
     super.new(name);
@@ -19,12 +19,12 @@ class adapter extends uvm_reg_adapter;
 
   function void bus2reg(uvm_sequence_item bus_item, ref uvm_reg_bus_op rw);
     dma_sequence_item tr;
-    assert($cast(tr,bus_item);
+    assert($cast(tr,bus_item));
 
-    if(wr_en == 1)
+    if(tr.wr_en == 1)
       rw.kind = UVM_WRITE;
-    else if(rd_en == 1)
-      rw.kind == UVM_READ;
+    else if(tr.rd_en == 1)
+      rw.kind = UVM_READ;
     //CHECK
     rw.data = tr.rdata;
     rw.addr = tr.addr; 
