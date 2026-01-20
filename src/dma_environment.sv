@@ -32,7 +32,7 @@ class dma_environment extends uvm_env;
     agent.monitor.item_collected_port.connect(subscriber.analysis_export);
 
     dma_model.default_map.set_sequencer(agent.sequencer,adapter);
-    dma_model.default_map.set_base_addr(0);
+    dma_model.default_map.set_base_addr('h400);
 
     predictor.map = dma_model.default_map;
     predictor.adapter = adapter;
