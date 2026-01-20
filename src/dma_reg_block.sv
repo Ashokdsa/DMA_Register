@@ -84,7 +84,7 @@ class dma_reg_block extends uvm_reg_block;
     default_map.add_reg(status, 'h14, "RO"); 
     default_map.add_reg(transfer_count, 'h18, "RO"); 
     default_map.add_reg(descriptor_addr, 'h1C, "RW"); 
-    default_map.add_reg(error_status, 'h20, "W1C"); 
+    default_map.add_reg(error_status, 'h20, "RW"); 
     default_map.add_reg(configu, 'h24, "RW"); 
 
     default_map.set_auto_predict(0);

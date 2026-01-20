@@ -688,7 +688,7 @@ class config_reg extends uvm_reg;
     descriptor_mode.configure(
       .parent(this),
       .size(1),
-      .lsb_pos(0),
+      .lsb_pos(8),
       .access("RW"),
       .volatile(0),
       .reset('h0),

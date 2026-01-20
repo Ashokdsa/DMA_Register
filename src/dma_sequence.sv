@@ -87,16 +87,16 @@ class reset_all_sequence extends dma_base_sequence;
     dma_model.error_status.reset(); 
     dma_model.configu.reset(); 
     */
-    rst_compare(dma_model.intr);
-    rst_compare(dma_model.ctrl);
-    rst_compare(dma_model.io_addr);
-    rst_compare(dma_model.mem_addr);
-    rst_compare(dma_model.extra_info);
-    rst_compare(dma_model.status);
-    rst_compare(dma_model.transfer_count);
-    rst_compare(dma_model.descriptor_addr);
-    rst_compare(dma_model.error_status);
-    rst_compare(dma_model.configu);
+    rst_compare(dma_model.intr,status);
+    rst_compare(dma_model.ctrl,status);
+    rst_compare(dma_model.io_addr,status);
+    rst_compare(dma_model.mem_addr,status);
+    rst_compare(dma_model.extra_info,status);
+    rst_compare(dma_model.status,status);
+    rst_compare(dma_model.transfer_count,status);
+    rst_compare(dma_model.descriptor_addr,status);
+    rst_compare(dma_model.error_status,status);
+    rst_compare(dma_model.configu,status);
   endtask
 endclass
 

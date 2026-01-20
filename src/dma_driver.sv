@@ -39,7 +39,7 @@ class dma_driver extends uvm_driver #(dma_sequence_item);
       vif.drv_cb.addr  <= req.addr;
     end
     `uvm_info(get_name,$sformatf("--------------------------------%0d inputs sent--------------------------------\n",count),UVM_DEBUG);
-    `uvm_info(get_name,$sformatf("RST_N:%0b WR:%0b RD:%0b WDATA = %0d ADDR = %0d",
+    `uvm_info(get_name,$sformatf("DRIVER SENT| RST_N:%0b Write_en:%0b Read_en:%0b WDATA = %0d ADDR = %0d",
       req.rst_n, 
       req.wr_en,
       req.rd_en,

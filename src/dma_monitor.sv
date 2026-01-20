@@ -28,13 +28,13 @@ class dma_monitor extends uvm_monitor;
       seq_item.rst_n = vif.mon_cb.rst_n;
       seq_item.rdata = vif.mon_cb.rdata;
       item_collected_port.write(seq_item);
-      `uvm_info(get_name,$sformatf("ACTIVE MON RECIEVED\nRSTN = %1b transfer = %1b write_read = %1b addr_in = %0d wdata_in = %0d strb_in = %0b \nPRDATA = %0d PREADY = %1b PSLVERR = %1b",
+      `uvm_info(get_name,$sformatf("MON RECIEVED\nRSTN = %1b write_en = %1b read_en = %1b addr = %0d wdata = %0d rdata = %0d",
+        seq_item.rst_n,
         seq_item.wr_en,
         seq_item.rd_en,
-        seq_item.wdata,
         seq_item.addr,
-        seq_item.rst_n,
-        seq_item.rdata,
+        seq_item.wdata,
+        seq_item.rdata
         ),
         UVM_DEBUG)
       @(vif.mon_cb);
