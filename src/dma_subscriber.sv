@@ -8,7 +8,7 @@ class dma_subscriber extends uvm_subscriber#(dma_sequence_item);
     rd_en_cp: coverpoint seq.rd_en;
     addr_cp: coverpoint seq.addr
     {
-      bins to_cover[] = {'h400,'h404,'h408,'h40C,'h412,'h416,'h420,'h424};
+      bins to_cover[] = {'h400,'h404,'h408,'h40C,'h410,'h414,'h418,'h41C,'h420,'h424};
     }
     wdata_cp: coverpoint seq.wdata;
     rdata_cp: coverpoint seq.rdata;
