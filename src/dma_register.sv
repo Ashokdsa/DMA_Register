@@ -68,7 +68,7 @@ class ctrl_reg extends uvm_reg;
     {
       bins w_count_bin[16] = {[0:$]};
     }
-    io_mem_cp: coverpoint io_mem;
+    io_mem_cp: coverpoint io_mem.value;
   endgroup
 
   function new(string name = "ctrl_reg");

@@ -10,7 +10,7 @@ class dma_agent extends uvm_agent;
   endfunction:new
 
   function void build_phase(uvm_phase phase);
-    super.build_phase(uvm_phase phase);
+    super.build_phase(phase);
     //ACTIVE BY DEFAULT
     driver = dma_driver::type_id::create("driver", this);
     sequencer = dma_sequencer::type_id::create("sequencer", this);

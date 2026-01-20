@@ -31,7 +31,7 @@ class dma_environment extends uvm_env;
   function void connect_phase(uvm_phase phase);    								   
     agent.monitor.item_collected_port.connect(subscriber.analysis_export);
 
-    dma_model.set_sequencer(agent.sequencer,adapter);
+    dma_model.default_map.set_sequencer(agent.sequencer,adapter);
     dma_model.default_map.set_base_addr(0);
 
     predictor.map = dma_model.default_map;

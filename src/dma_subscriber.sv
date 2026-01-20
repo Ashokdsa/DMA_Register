@@ -15,12 +15,12 @@ class dma_subscriber extends uvm_subscriber#(dma_sequence_item);
 
     wrxaddr: cross wr_en_cp,addr_cp
     {
-      bins normal[] = binsof(wr_en_cp) intersect {1'b1};
+      bins normal = binsof(wr_en_cp) intersect {1'b1};
       ignore_bins others = binsof(wr_en_cp) intersect {1'b0};
     }
     rdxaddr: cross rd_en_cp,addr_cp
     {
-      bins normal[] = binsof(rd_en_cp) intersect {1'b1};
+      bins normal = binsof(rd_en_cp) intersect {1'b1};
       ignore_bins others = binsof(rd_en_cp) intersect {1'b0};
     }
 

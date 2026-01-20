@@ -1,4 +1,5 @@
 class dma_driver extends uvm_driver #(dma_sequence_item);
+  int count;
   virtual dma_inf vif;
   `uvm_component_utils(dma_driver)
     

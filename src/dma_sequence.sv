@@ -12,7 +12,7 @@ class dma_base_sequence extends uvm_sequence#(dma_sequence_item); //BASE sequenc
     `uvm_fatal(get_name,"NOT EXTENDED")
   endtask
 
-  task rst_compare(uvm_reg a);
+  task rst_compare(uvm_reg a,uvm_status_e status);
     a.read(status,read,UVM_BACKDOOR);
     if(read == 32'h00000000)
       `uvm_info(a.get_name,"RESET WORKS HERE",UVM_NONE)
@@ -21,42 +21,42 @@ class dma_base_sequence extends uvm_sequence#(dma_sequence_item); //BASE sequenc
 
   endtask
 
-  task check_RO(uvm_reg_field regi, uvm_reg_status_e status,int sz);
-    bit[sz-1:0] written,read,pread;
+  task check_RO(uvm_reg_field regi, uvm_status_e status,int sz);
+    bit[31:0] written,read,pread;
     regi.read(status,pread,UVM_BACKDOOR);
     written = pread;
     while(written == pread)
-      written = $urandom();
+      written = $urandom_range(0,((2**sz)-1));
     regi.write(status,written,UVM_BACKDOOR);
-    regi.mirror(status,read);
+    regi.read(status,read);
     if(read === pread)
       `uvm_info(regi.get_full_name,"IS A READ ONLY FIELD",UVM_NONE)
     else
       `uvm_error(regi.get_full_name,"IS NOT A READ ONLY FIELD")
   endtask
 
-  task check_RW(uvm_reg_field regi, output uvm_reg_status_e status,int sz);
-    bit[sz-1:0] written,read,pread;
+  task check_RW(uvm_reg_field regi, uvm_status_e status,int sz);
+    bit[31:0] written,read,pread;
     regi.read(status,pread,UVM_BACKDOOR);
     written = pread;
     while(written == pread)
-      written = $urandom();
+      written = $urandom_range(0,(2**sz)-1);
     regi.write(status,written);
-    regi.mirror(status,read,UVM_BACKDOOR);
+    regi.read(status,read,UVM_BACKDOOR);
     if(read === written)
       `uvm_info(regi.get_full_name,"IS A RW FIELD",UVM_NONE)
     else
       `uvm_error(regi.get_full_name,"IS NOT A RW FIELD")
   endtask
 
-  task check_RW1C(uvm_reg_field regi, output uvm_reg_status_e status);
+  task check_RW1C(uvm_reg_field regi, output uvm_status_e status);
     bit written,read,pread;
     regi.read(status,pread,UVM_BACKDOOR);
     written = pread;
     while(written == pread)
       written = $urandom();
     regi.write(status,written);
-    regi.mirror(status,read,UVM_BACKDOOR);
+    regi.read(status,read,UVM_BACKDOOR);
     if(written && !read)
       `uvm_info(regi.get_full_name,"IS A RW1C FIELD",UVM_NONE)
     else if(written && read)
@@ -72,7 +72,7 @@ class reset_all_sequence extends dma_base_sequence;
   endfunction:new
 
   task body();
-    uvm_reg_status_e status;
+    uvm_status_e status;
     dma_model.reset();
     // OR
     /*

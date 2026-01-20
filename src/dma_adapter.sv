@@ -1,7 +1,7 @@
-class adapter extends uvm_reg_adapter;
-  `uvm_object_utils(adapter)
+class dma_adapter extends uvm_reg_adapter;
+  `uvm_object_utils(dma_adapter)
 
-  function new(string name = "adapter");
+  function new(string name = "dma_adapter");
     super.new(name);
   endfunction
 
@@ -30,7 +30,6 @@ class adapter extends uvm_reg_adapter;
     rw.addr = tr.addr; 
 
     rw.status = UVM_IS_OK;
-    return tr;
   endfunction
 
 endclass

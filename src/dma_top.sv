@@ -25,4 +25,4 @@ module dma_top;
     $finish;
   end:test_run
 
-endmodule:top
+endmodule:dma_top

@@ -6,7 +6,6 @@ SHELL := /bin/bash
 .ONESHELL:
 all:
 	source $(QUESTA)
-	make clean
 	make compile
 	make simulate
 	vcover report -html dma_coverage.ucdb -htmldir covReport -details
@@ -21,6 +20,7 @@ clean:
 	clear
 
 compile:
+	make clean
 	@echo -e "\t\t\t\t...............................COMPILING CODE.............................."
 	source $(QUESTA)
 	vlog -sv +acc +cover +fcover -l dma.log dma_top.sv 
