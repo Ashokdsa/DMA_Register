@@ -33,7 +33,7 @@ wave:
 
 simulate:
 	@echo -e "\t\t\t\t...........................SIMULATING TEST = $(TEST) WITH VERBOSITY = $(V)..........................."
-	vsim -vopt work.dma_top -voptargs=+acc=npr -assertdebug -l simulation.log -coverage -c -do "coverage save -onexit -assert -directive -cvg -codeAll dma_coverage.ucdb; run -all; exit" +UVM_TESTNAME=$(TEST) +UVM_VERBOSITY=$(V)
+	vsim +define+UVM_REG_NO_INDIVIDUAL_FIELD_ACCESS -vopt work.dma_top -voptargs=+acc=npr -assertdebug -l simulation.log -coverage -c -do "coverage save -onexit -assert -directive -cvg -codeAll dma_coverage.ucdb; run -all; exit" +UVM_TESTNAME=$(TEST) +UVM_VERBOSITY=$(V)
 	awk ' \
 		/ERROR/   { print "\033[0;91m" $$0 "\033[0m"; next } \
 		/WARNING/ { print "\033[0;93m" $$0 "\033[0m"; next } \
