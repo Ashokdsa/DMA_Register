@@ -34,20 +34,23 @@ class dma_base_sequence extends uvm_sequence#(dma_sequence_item); //BASE sequenc
   task check_RO(uvm_reg main,uvm_reg_field regi, uvm_status_e status,int sz,int pos);
     bit[31:0] chk;
     main.read(status,pread,UVM_BACKDOOR);
+    $display("--------------------------------------------------------------------------\nBEFORE CLEAR %32b",pread);
     proper_val(pos,sz);
     written = pread >> pos;
-    while(written === pread)
+    while(written === (pread >> pos))
       written = $urandom_range(0,((2**sz)-1));
     regi.set(written);
+    $display("BEFORE UPDATING %0s.VALUE = %0d",regi.get_name,regi.get());
     main.update(status,UVM_BACKDOOR);
     main.read(status,read);
+    $display("BEFORE 2 CLEAR %32b %32b",pread,read>>pos);
     proper_val(pos,sz);
-    $display("--------------------------------------------------------------------------
-      \nREADB = %0d WRITEB = %0d READF = %0d",pread,written,read);
-    if(read[pos+:sz] === pread)
+    $display("READB = %0d WRITEB = %0d READF = %0d",pread>>pos,written,read>>pos);
+    if((read >> pos) === pread)
       `uvm_info(regi.get_full_name,"IS A READ ONLY FIELD",UVM_NONE)
     else
       `uvm_error(regi.get_full_name,"IS NOT A READ ONLY FIELD")
+    $display("--------------------------------------------------------------------------");
   endtask
 
   task check_RW(uvm_reg main, uvm_reg_field regi, uvm_status_e status,int sz,int pos);
@@ -55,37 +58,39 @@ class dma_base_sequence extends uvm_sequence#(dma_sequence_item); //BASE sequenc
     main.read(status,pread,UVM_BACKDOOR);
     proper_val(pos,sz);
     written = pread >> pos;
-    while(written === pread)
+    while(written === (pread >> pos))
       written = $urandom_range(0,(2**sz)-1);
     regi.set(written);
+    $display("--------------------------------------------------------------------------\nBEFORE UPDATING %0s.VALUE = %0d",regi.get_name,regi.get());
     main.update(status);
     main.read(status,read,UVM_BACKDOOR);
     proper_val(pos,sz);
-    $display("--------------------------------------------------------------------------
-      \nREADB = %0d WRITEF = %0d READB = %0d",pread,written,read);
-    if(read === written)
+    $display("READB = %0d WRITEF = %0d READB = %0d",pread>>pos,written,read>>pos);
+    if((read>>pos) === written)
       `uvm_info(regi.get_full_name,"IS A RW FIELD",UVM_NONE)
     else
       `uvm_error(regi.get_full_name,"IS NOT A RW FIELD")
+    $display("--------------------------------------------------------------------------");
   endtask
 
-  task check_RW1C(uvm_reg main, uvm_reg_field regi, output uvm_status_e status,int pos);
+  task check_RW1C(uvm_reg main, uvm_reg_field regi, uvm_status_e status,int pos);
     bit written,read,pread;
     main.read(status,pread,UVM_BACKDOOR);
     proper_val(pos,1);
     written = pread>>pos;
-    while(written === pread)
+    while(written === (pread >> pos))
       written = $urandom();
     regi.set(written);
+    $display("--------------------------------------------------------------------------\nBEFORE UPDATING %0s.VALUE = %0d",regi.get_name,regi.get());
     main.update(status);
     main.read(status,read,UVM_BACKDOOR);
     proper_val(pos,1);
-    $display("--------------------------------------------------------------------------
-      \nREADB = %0d WRITEF = %0d READB = %0d",pread,written,read);
-    if(written && !read)
+    $display("READB = %0d WRITEF = %0d READB = %0d",pread>>pos,written,read>>pos);
+    if(written && !(read >> pos))
       `uvm_info(regi.get_full_name,"IS A RW1C FIELD",UVM_NONE)
     else if(written && read)
       `uvm_error(regi.get_full_name,"IS NOT A RW1C FIELD")
+    $display("--------------------------------------------------------------------------");
   endtask
 endclass
 
@@ -137,8 +142,8 @@ class intr_sequence extends dma_base_sequence;
     uvm_status_e status;
     dma_model.reset();
     repeat(10) begin
-      check_RO(dma_model.intr,dma_model.intr.intr_status,status,16,);
-      check_RW(dma_model.intr,dma_model.intr.intr_mask,status,16,);
+      check_RO(dma_model.intr,dma_model.intr.intr_status,status,16,0);
+      check_RW(dma_model.intr,dma_model.intr.intr_mask,status,16,16);
     end
   endtask
 
@@ -155,10 +160,10 @@ class ctrl_sequence extends dma_base_sequence;
     uvm_status_e status;
     dma_model.reset();
     repeat(10) begin
-      check_RW(dma_model.ctrl,dma_model.ctrl.start_dma,status,1);
-      check_RW(dma_model.ctrl,dma_model.ctrl.w_count,status,15);
-      check_RW(dma_model.ctrl,dma_model.ctrl.io_mem,status,1);
-      check_RO(dma_model.ctrl,dma_model.ctrl.Reserved,status,15);
+      check_RW(dma_model.ctrl,dma_model.ctrl.start_dma,status,1,0);
+      check_RW(dma_model.ctrl,dma_model.ctrl.w_count,status,15,1);
+      check_RW(dma_model.ctrl,dma_model.ctrl.io_mem,status,1,16);
+      check_RO(dma_model.ctrl,dma_model.ctrl.Reserved,status,15,15);
     end
   endtask
 
@@ -175,7 +180,7 @@ class io_addr_sequence extends dma_base_sequence;
     uvm_status_e status;
     dma_model.reset();
     repeat(10) begin
-      check_RW(dma_model.io_addr,dma_model.io_addr.io_addr,status,32);
+      check_RW(dma_model.io_addr,dma_model.io_addr.io_addr,status,32,0);
     end
   endtask
 
@@ -192,7 +197,7 @@ class mem_addr_sequence extends dma_base_sequence;
     uvm_status_e status;
     dma_model.reset();
     repeat(10) begin
-      check_RW(dma_model.mem_addr,dma_model.mem_addr.mem_addr,status,32);
+      check_RW(dma_model.mem_addr,dma_model.mem_addr.mem_addr,status,32,0);
     end
   endtask
 
@@ -209,13 +214,13 @@ class status_sequence extends dma_base_sequence;
     uvm_status_e status;
     dma_model.reset();
     repeat(10) begin
-      check_RO(dma_model.status,dma_model.status.busy,status,1);
-      check_RO(dma_model.status,dma_model.status.done,status,1);
-      check_RO(dma_model.status,dma_model.status.error,status,1);
-      check_RO(dma_model.status,dma_model.status.paused,status,1);
-      check_RO(dma_model.status,dma_model.status.current_state,status,4);
-      check_RO(dma_model.status,dma_model.status.fifo_level,status,8);
-      check_RO(dma_model.status,dma_model.status.Reserved,status,16);
+      check_RO(dma_model.status,dma_model.status.busy,status,1,0);
+      check_RO(dma_model.status,dma_model.status.done,status,1,1);
+      check_RO(dma_model.status,dma_model.status.error,status,1,2);
+      check_RO(dma_model.status,dma_model.status.paused,status,1,3);
+      check_RO(dma_model.status,dma_model.status.current_state,status,4,4);
+      check_RO(dma_model.status,dma_model.status.fifo_level,status,8,8);
+      check_RO(dma_model.status,dma_model.status.Reserved,status,16,16);
     end
   endtask
 
@@ -232,7 +237,7 @@ class extra_info_sequence extends dma_base_sequence;
     uvm_status_e status;
     dma_model.reset();
     repeat(10) begin
-      check_RW(dma_model.extra_info,dma_model.extra_info.extra_info,status,32);
+      check_RW(dma_model.extra_info,dma_model.extra_info.extra_info,status,32,0);
     end
   endtask
 
@@ -249,7 +254,7 @@ class transfer_count_sequence extends dma_base_sequence;
     uvm_status_e status;
     dma_model.reset();
     repeat(10) begin
-      check_RO(dma_model.transfer_count,dma_model.transfer_count.transfer_count,status,32);
+      check_RO(dma_model.transfer_count,dma_model.transfer_count.transfer_count,status,32,0);
     end
   endtask
 
@@ -266,7 +271,7 @@ class descriptor_addr_sequence extends dma_base_sequence;
     uvm_status_e status;
     dma_model.reset();
     repeat(10) begin
-      check_RW(dma_model.descriptor_addr,dma_model.descriptor_addr.descriptor_addr,status,32);
+      check_RW(dma_model.descriptor_addr,dma_model.descriptor_addr.descriptor_addr,status,32,0);
     end
   endtask
 
@@ -284,14 +289,14 @@ class error_status_sequence extends dma_base_sequence;
     dma_model.reset();
 
     repeat(10) begin
-      check_RW1C(dma_model.error_status,dma_model.error_status.bus_error,status);
-      check_RW1C(dma_model.error_status,dma_model.error_status.timeout_error,status);
-      check_RW1C(dma_model.error_status,dma_model.error_status.alignment_error,status);
-      check_RW1C(dma_model.error_status,dma_model.error_status.overflow_error,status);
-      check_RW1C(dma_model.error_status,dma_model.error_status.underflow_error,status);
-      check_RO(dma_model.error_status,dma_model.error_status.Reserved,status,3);
-      check_RO(dma_model.error_status,dma_model.error_status.error_code,status,8);
-      check_RO(dma_model.error_status,dma_model.error_status.error_addr_offset,status,16);
+      check_RW1C(dma_model.error_status,dma_model.error_status.bus_error,status,0);
+      check_RW1C(dma_model.error_status,dma_model.error_status.timeout_error,status,1);
+      check_RW1C(dma_model.error_status,dma_model.error_status.alignment_error,status,2);
+      check_RW1C(dma_model.error_status,dma_model.error_status.overflow_error,status,3);
+      check_RW1C(dma_model.error_status,dma_model.error_status.underflow_error,status,4);
+      check_RO(dma_model.error_status,dma_model.error_status.Reserved,status,3,5);
+      check_RO(dma_model.error_status,dma_model.error_status.error_code,status,8,8);
+      check_RO(dma_model.error_status,dma_model.error_status.error_addr_offset,status,16,16);
     end
   endtask
 
@@ -309,13 +314,13 @@ class config_sequence extends dma_base_sequence;
     dma_model.reset();
 
     repeat(10) begin
-      check_RW(dma_model.configu,dma_model.configu.prioriti,status,2);
-      check_RW(dma_model.configu,dma_model.configu.auto_restart,status,1);
-      check_RW(dma_model.configu,dma_model.configu.interrupt_enable,status,1);
-      check_RW(dma_model.configu,dma_model.configu.burst_size,status,2);
-      check_RW(dma_model.configu,dma_model.configu.data_width,status,2);
-      check_RW(dma_model.configu,dma_model.configu.descriptor_mode,status,1);
-      check_RO(dma_model.configu,dma_model.configu.Reserved,status,23);
+      check_RW(dma_model.configu,dma_model.configu.prioriti,status,2,0);
+      check_RW(dma_model.configu,dma_model.configu.auto_restart,status,1,2);
+      check_RW(dma_model.configu,dma_model.configu.interrupt_enable,status,1,3);
+      check_RW(dma_model.configu,dma_model.configu.burst_size,status,2,4);
+      check_RW(dma_model.configu,dma_model.configu.data_width,status,2,6);
+      check_RW(dma_model.configu,dma_model.configu.descriptor_mode,status,1,8);
+      check_RO(dma_model.configu,dma_model.configu.Reserved,status,23,9);
     end
   endtask
 endclass
