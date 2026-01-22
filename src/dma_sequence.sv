@@ -13,6 +13,7 @@ class dma_base_sequence extends uvm_sequence#(dma_sequence_item); //BASE sequenc
   endtask
 
   task rst_compare(uvm_reg a,uvm_status_e status);
+    bit[31:0] read;
     a.read(status,read,UVM_BACKDOOR);
     if(read == 32'h00000000)
       `uvm_info(a.get_name,"RESET WORKS HERE",UVM_NONE)
@@ -20,7 +21,7 @@ class dma_base_sequence extends uvm_sequence#(dma_sequence_item); //BASE sequenc
       `uvm_warning(a.get_name,"RESET VALUE DIFFERS")
   endtask
 
-  task proper_val(int pos,int sz);
+  task proper_val(int pos,int sz,bit[31:0] read,bit[31:0] pread);
     for(int i = 0; i < 32; i++) //ENSURES ONLY THE DATA OF THE FIELD IS SHOWN
     begin:valid_read
       if(i < pos && i >= pos+sz)
@@ -33,19 +34,21 @@ class dma_base_sequence extends uvm_sequence#(dma_sequence_item); //BASE sequenc
 
   task check_RO(uvm_reg main,uvm_reg_field regi, uvm_status_e status,int sz,int pos);
     bit[31:0] chk;
+    bit[31:0] written,read,pread;
     main.read(status,pread,UVM_BACKDOOR);
-    $display("--------------------------------------------------------------------------\nBEFORE CLEAR %32b",pread);
-    proper_val(pos,sz);
+    $display("--------------------------------------------------------------------------\n%0t | BEFORE CLEAR %32b",$time,pread);
+    proper_val(pos,sz,read,pread);
     written = pread >> pos;
     while(written === (pread >> pos))
       written = $urandom_range(0,((2**sz)-1));
     regi.set(written);
-    $display("WRITING %0s.VALUE = %0d",regi.get_name,regi.get());
+    $display("%0t | WRITING %0s.VALUE = %8h",$time,regi.get_name,regi.get());
     main.write(status,written<<pos,UVM_BACKDOOR);
+    //main.poke(status,written<<pos);
     main.read(status,read);
-    $display("BEFORE 2 CLEAR %32b %32b",pread,read>>pos);
-    proper_val(pos,sz);
-    $display("READB = %0d WRITEB = %0d READF = %0d",pread>>pos,written,read>>pos);
+    $display("%0t | BEFORE 2 CLEAR %8h %8h",$time,pread,read>>pos);
+    proper_val(pos,sz,read,pread);
+    $display("%0t | READB = %32b WRITEB = %8h READF = %8h",$time,pread>>pos,written,read>>pos);
     if((read >> pos) === pread)
       `uvm_info(regi.get_full_name,"IS A READ ONLY FIELD",UVM_NONE)
     else
@@ -56,39 +59,54 @@ class dma_base_sequence extends uvm_sequence#(dma_sequence_item); //BASE sequenc
   task check_RW(uvm_reg main, uvm_reg_field regi, uvm_status_e status,int sz,int pos);
     bit[31:0] written,read,pread;
     main.read(status,pread,UVM_BACKDOOR);
-    proper_val(pos,sz);
+    proper_val(pos,sz,read,pread);
     written = pread >> pos;
     while(written === (pread >> pos))
       written = $urandom_range(0,(2**sz)-1);
     regi.set(written);
-    $display("--------------------------------------------------------------------------\nBEFORE UPDATING %0s.VALUE = %0d",regi.get_name,regi.get());
+    //$display("--------------------------------------------------------------------------\nBEFORE UPDATING %0s.VALUE = %32b",regi.get_name,regi.get());
     main.update(status);
-    main.read(status,read,UVM_BACKDOOR);
-    proper_val(pos,sz);
-    $display("READB = %0d WRITEF = %0d READB = %0d",pread>>pos,written,read>>pos);
+    //main.read(status,read,UVM_BACKDOOR);
+    main.read(status,read,UVM_FRONTDOOR);
+    proper_val(pos,sz,read,pread);
+    //$display("READB = %32b WRITEF = %32b READB = %32b",pread>>pos,written,read>>pos);
     if((read>>pos) === written)
       `uvm_info(regi.get_full_name,"IS A RW FIELD",UVM_NONE)
     else
       `uvm_error(regi.get_full_name,"IS NOT A RW FIELD")
-    $display("--------------------------------------------------------------------------");
+    //$display("--------------------------------------------------------------------------");
   endtask
 
   task check_RW1C(uvm_reg main, uvm_reg_field regi, uvm_status_e status,int pos);
-    bit written,read,pread;
+    bit[31:0] written,read,pread;
     main.read(status,pread,UVM_BACKDOOR);
-    proper_val(pos,1);
+    for(int i = 0; i < 32; i++) //ENSURES ONLY THE DATA OF THE FIELD IS SHOWN
+    begin:valid_read
+      if(i != pos)
+      begin
+        pread[i] = 1'b0;
+        read[i] = 1'b0;
+      end
+    end:valid_read
     written = pread>>pos;
     while(written === (pread >> pos))
       written = $urandom();
     regi.set(written);
-    $display("--------------------------------------------------------------------------\nBEFORE UPDATING %0s.VALUE = %0d",regi.get_name,regi.get());
+    $display("--------------------------------------------------------------------------\nBEFORE UPDATING %0s.VALUE = %32b",regi.get_name,regi.get());
     main.update(status);
     main.read(status,read,UVM_BACKDOOR);
-    proper_val(pos,1);
-    $display("READB = %0d WRITEF = %0d READB = %0d",pread>>pos,written,read>>pos);
+    for(int i = 0; i < 32; i++) //ENSURES ONLY THE DATA OF THE FIELD IS SHOWN
+    begin:valid_read
+      if(i != pos)
+      begin
+        pread[i] = 1'b0;
+        read[i] = 1'b0;
+      end
+    end:valid_read
+    $display("READB = %32b WRITEF = %32b READB = %32b",pread>>pos,written,read>>pos);
     if(written && !(read >> pos))
       `uvm_info(regi.get_full_name,"IS A RW1C FIELD",UVM_NONE)
-    else if(written && read)
+    else if(written && (read >> pos))
       `uvm_error(regi.get_full_name,"IS NOT A RW1C FIELD")
     $display("--------------------------------------------------------------------------");
   endtask

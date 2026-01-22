@@ -28,7 +28,7 @@ class dma_monitor extends uvm_monitor;
       seq_item.rst_n = vif.mon_cb.rst_n;
       seq_item.rdata = vif.mon_cb.rdata;
       item_collected_port.write(seq_item);
-      `uvm_info(get_name,$sformatf("MON RECIEVED\nRSTN = %1b write_en = %1b read_en = %1b addr = %0d wdata = %0d rdata = %0d",
+      `uvm_info(get_name,$sformatf("MON RECIEVED\nRSTN = %1b write_en = %1b read_en = %1b addr = %4h wdata = %8h rdata = %8h",
         seq_item.rst_n,
         seq_item.wr_en,
         seq_item.rd_en,
@@ -36,7 +36,7 @@ class dma_monitor extends uvm_monitor;
         seq_item.wdata,
         seq_item.rdata
         ),
-        UVM_DEBUG)
+        UVM_MEDIUM)
     end
   endtask:run_phase
 endclass:dma_monitor

@@ -38,15 +38,18 @@ class dma_driver extends uvm_driver #(dma_sequence_item);
       vif.drv_cb.wdata <= req.wdata;
       vif.drv_cb.addr  <= req.addr;
     end
-    `uvm_info(get_name,$sformatf("--------------------------------%0d inputs sent--------------------------------\n",count),UVM_DEBUG);
-    `uvm_info(get_name,$sformatf("DRIVER SENT| RST_N:%0b Write_en:%0b Read_en:%0b WDATA = %0d ADDR = %0d",
+    count++;
+    if(get_report_verbosity_level() >= UVM_MEDIUM)
+      $display("--------------------------------%0d inputs sent--------------------------------\n",count);
+    //`uvm_info(get_name,$sformatf("--------------------------------%0d inputs sent--------------------------------\n",count),UVM_DEBUG);
+    `uvm_info(get_name,$sformatf("DRIVER SENT| RST_N:%0b Write_en:%0b Read_en:%0b WDATA = %8h ADDR = %4h",
       req.rst_n, 
       req.wr_en,
       req.rd_en,
       req.wdata,
       req.addr 
       ),
-      UVM_DEBUG)
+      UVM_MEDIUM)
     repeat(2)@(vif.drv_cb);
     req.rdata = vif.drv_cb.rdata;
   endtask
