@@ -47,6 +47,7 @@ class dma_driver extends uvm_driver #(dma_sequence_item);
       req.addr 
       ),
       UVM_DEBUG)
-    @(vif.drv_cb);
+    repeat(2)@(vif.drv_cb);
+    req.rdata = vif.drv_cb.rdata;
   endtask
 endclass

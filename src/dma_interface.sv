@@ -13,6 +13,7 @@ interface dma_inf(input logic clk);
     output wdata;
     output addr;
     output rst_n;
+    input rdata;
   endclocking
 
   clocking mon_cb@(posedge clk);	// Passive monitor clocking block
