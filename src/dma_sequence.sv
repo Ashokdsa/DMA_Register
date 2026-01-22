@@ -40,8 +40,8 @@ class dma_base_sequence extends uvm_sequence#(dma_sequence_item); //BASE sequenc
     while(written === (pread >> pos))
       written = $urandom_range(0,((2**sz)-1));
     regi.set(written);
-    $display("BEFORE UPDATING %0s.VALUE = %0d",regi.get_name,regi.get());
-    main.update(status,UVM_BACKDOOR);
+    $display("WRITING %0s.VALUE = %0d",regi.get_name,regi.get());
+    main.write(status,written<<pos,UVM_BACKDOOR);
     main.read(status,read);
     $display("BEFORE 2 CLEAR %32b %32b",pread,read>>pos);
     proper_val(pos,sz);
