@@ -23,6 +23,7 @@ class dma_driver extends uvm_driver #(dma_sequence_item);
 
   virtual task drive();
     @(vif.drv_cb);
+    req.rdata = vif.drv_cb.rdata;
     if(req.rst_n == 1'b0)
     begin
       vif.drv_cb.rst_n <= 1'b0;

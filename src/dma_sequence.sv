@@ -21,7 +21,7 @@ class dma_base_sequence extends uvm_sequence#(dma_sequence_item); //BASE sequenc
       `uvm_warning(a.get_name,"RESET VALUE DIFFERS")
   endtask
 
-  task proper_val(int pos,int sz,bit[31:0] read,bit[31:0] pread);
+  task proper_val(int pos,int sz,ref bit[31:0] read,ref bit[31:0] pread);
     for(int i = 0; i < 32; i++) //ENSURES ONLY THE DATA OF THE FIELD IS SHOWN
     begin:valid_read
       if(i < pos && i >= pos+sz)
@@ -36,7 +36,7 @@ class dma_base_sequence extends uvm_sequence#(dma_sequence_item); //BASE sequenc
     bit[31:0] chk;
     bit[31:0] written,read,pread;
     main.read(status,pread,UVM_BACKDOOR);
-    $display("--------------------------------------------------------------------------\n%0t | BEFORE CLEAR %32b",$time,pread);
+    $display("--------------------------------------------------------------------------\n%0t | BEFORE CLEAR %8h",$time,pread);
     proper_val(pos,sz,read,pread);
     written = pread >> pos;
     while(written === (pread >> pos))
@@ -46,9 +46,9 @@ class dma_base_sequence extends uvm_sequence#(dma_sequence_item); //BASE sequenc
     main.write(status,written<<pos,UVM_BACKDOOR);
     //main.poke(status,written<<pos);
     main.read(status,read);
-    $display("%0t | BEFORE 2 CLEAR %8h %8h",$time,pread,read>>pos);
+    $display("%0t | BEFORE 2 CLEAR %8h %8h",$time,pread,(read>>pos));
     proper_val(pos,sz,read,pread);
-    $display("%0t | READB = %32b WRITEB = %8h READF = %8h",$time,pread>>pos,written,read>>pos);
+    $display("%0t | READB = %8h WRITEB = %8h READF = %8h",$time,(pread>>pos),written,(read>>pos));
     if((read >> pos) === pread)
       `uvm_info(regi.get_full_name,"IS A READ ONLY FIELD",UVM_NONE)
     else

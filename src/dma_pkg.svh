@@ -15,5 +15,6 @@ package dma_pkg;
   `include "dma_agent.sv"           
   `include "dma_subscriber.sv"
   `include "dma_environment.sv"   
+  `include "dma_report_server.sv"   
   `include "dma_test.sv"
 endpackage
