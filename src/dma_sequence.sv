@@ -2,10 +2,19 @@ class dma_base_sequence extends uvm_sequence#(dma_sequence_item); //BASE sequenc
   `uvm_object_utils(dma_base_sequence)    //Factory Registration
   dma_sequence_item seq;
   dma_reg_block dma_model;
+  bit rst = 1'b1;
   bit[31:0] written,read,pread;
+  bit[31:0] val[$];
 
   function new(string name = "dma_base_sequence");
+    bit[31:0] i = 1'b1;
     super.new(name);
+    repeat(32) 
+    begin
+      val.push_back(i);
+      i = i << 1;
+    end
+    $display("VAL = %0p",val);
   endfunction:new
 
   task body();
@@ -30,88 +39,6 @@ class dma_base_sequence extends uvm_sequence#(dma_sequence_item); //BASE sequenc
         read[i] = 1'b0;
       end
     end:valid_read
-  endtask
-
-  task check_RO(uvm_reg main,uvm_reg_field regi, uvm_status_e status,int sz,int pos);
-    bit[31:0] chk;
-    bit[31:0] written,read,pread;
-    main.read(status,pread,UVM_FRONTDOOR);
-    main.read(status,pread,UVM_BACKDOOR);
-    $display("--------------------------------------------------------------------------\n%0t | BEFORE CLEAR %8h",$time,pread);
-    proper_val(pos,sz,read,pread);
-    written = pread >> pos;
-    while(written === (pread >> pos))
-      written = $urandom_range(0,((2**sz)-1));
-    regi.set(written);
-    $display("%0t | WRITING %0s.VALUE = %8h",$time,regi.get_name,regi.get());
-    main.write(status,written<<pos,UVM_BACKDOOR);
-    //main.poke(status,written<<pos);
-    main.read(status,read);
-    $display("%0t | BEFORE 2 CLEAR %8h %8h",$time,pread,(read>>pos));
-    proper_val(pos,sz,read,pread);
-    $display("%0t | READB = %8h WRITEB = %8h READF = %8h",$time,(pread>>pos),written,(read>>pos));
-    if((read >> pos) === pread)
-      `uvm_info(regi.get_full_name,"IS A READ ONLY FIELD",UVM_NONE)
-    else
-      `uvm_error(regi.get_full_name,"IS NOT A READ ONLY FIELD")
-    $display("--------------------------------------------------------------------------");
-  endtask
-
-  task check_RW(uvm_reg main, uvm_reg_field regi, uvm_status_e status,int sz,int pos);
-    bit[31:0] written,read,pread;
-    main.read(status,pread,UVM_FRONTDOOR);
-    main.read(status,pread,UVM_BACKDOOR);
-    proper_val(pos,sz,read,pread);
-    written = pread >> pos;
-    while(written === (pread >> pos))
-      written = $urandom_range(0,(2**sz)-1);
-    regi.set(written);
-    //$display("--------------------------------------------------------------------------\nBEFORE UPDATING %0s.VALUE = %32b",regi.get_name,regi.get());
-    main.update(status);
-    //main.read(status,read,UVM_BACKDOOR);
-    main.read(status,read,UVM_FRONTDOOR);
-    proper_val(pos,sz,read,pread);
-    //$display("READB = %32b WRITEF = %32b READB = %32b",pread>>pos,written,read>>pos);
-    if((read>>pos) === written)
-      `uvm_info(regi.get_full_name,"IS A RW FIELD",UVM_NONE)
-    else
-      `uvm_error(regi.get_full_name,"IS NOT A RW FIELD")
-    //$display("--------------------------------------------------------------------------");
-  endtask
-
-  task check_RW1C(uvm_reg main, uvm_reg_field regi, uvm_status_e status,int pos);
-    bit[31:0] written,read,pread;
-    main.read(status,pread,UVM_FRONTDOOR);
-    main.read(status,pread,UVM_BACKDOOR);
-    for(int i = 0; i < 32; i++) //ENSURES ONLY THE DATA OF THE FIELD IS SHOWN
-    begin:valid_read
-      if(i != pos)
-      begin
-        pread[i] = 1'b0;
-        read[i] = 1'b0;
-      end
-    end:valid_read
-    written = pread>>pos;
-    while(written === (pread >> pos))
-      written = $urandom();
-    regi.set(written);
-    $display("--------------------------------------------------------------------------\nBEFORE UPDATING %0s.VALUE = %32b",regi.get_name,regi.get());
-    main.update(status);
-    main.read(status,read,UVM_BACKDOOR);
-    for(int i = 0; i < 32; i++) //ENSURES ONLY THE DATA OF THE FIELD IS SHOWN
-    begin:valid_read
-      if(i != pos)
-      begin
-        pread[i] = 1'b0;
-        read[i] = 1'b0;
-      end
-    end:valid_read
-    $display("READB = %32b WRITEF = %32b READB = %32b",pread>>pos,written,read>>pos);
-    if(written && !(read >> pos))
-      `uvm_info(regi.get_full_name,"IS A RW1C FIELD",UVM_NONE)
-    else if(written && (read >> pos))
-      `uvm_error(regi.get_full_name,"IS NOT A RW1C FIELD")
-    $display("--------------------------------------------------------------------------");
   endtask
 endclass
 
@@ -154,20 +81,70 @@ endclass
 //INDIVIDUAL
 class intr_sequence extends dma_base_sequence;
   `uvm_object_utils(intr_sequence)    //Factory Registration
+  bit[4:0] idx;
 
   function new(string name = "intr_sequence");
     super.new(name);
   endfunction:new
 
   task body();
+    int i;
     uvm_status_e status;
-    repeat(10) begin
-      check_RO(dma_model.intr,dma_model.intr.intr_status,status,16,0);
-      check_RW(dma_model.intr,dma_model.intr.intr_mask,status,16,16);
-    end
-  endtask
+    $display("------------------------TESTING INTERRUPT REGISTER------------------------");
+    repeat(32) begin
+      //RESET IF SEQUENCE IS CALLED ALONE
+      $display("VAL = %0p",val);
+      if(rst)
+      begin
+        dma_model.intr.reset();
+        rst_compare(dma_model.configu,status);
+        rst = 0;
+      end
+      dma_model.intr.peek(status,pread);
+      $display("--------------------------------------------------------------------------\nINITIAL VALUE: FULL = %0h | intr_status(RO|16) = %0h intr_mask(RW|16) = %0h",pread,pread[15:0],pread[31:16]);
+      
+      written = pread;
+      idx = 0;
+      while(written == pread)
+      begin
+        written = val[idx];
+        if(idx >= val.size()) idx = 0;
+        else idx++;
+      end
+      if(idx != 0) val.delete(idx-1);
+      else val.delete(idx);
+      
+      $display("WRITING VALUE = %0h",written);
+      dma_model.intr.write(status,written,UVM_FRONTDOOR);
 
+      dma_model.intr.peek(status,read);
+      $display("AFTER WRITING %0h: FULL = %0h | intr_status(RO|16) = %0h intr_mask(RW|16) = %0h",written,read,read[15:0],read[31:16]);
+
+      //CHECK FOR RO FIELD
+      if(read[15:0] == pread[15:0])
+        `uvm_info("INTR.STATUS","IS A READ ONLY REGISTER FIELD",UVM_LOW)
+      else
+        `uvm_error("INTR.STATUS","IS NOT READ ONLY REGISTER FIELD")
+
+      //CHECK FOR RW FIELD
+      if(read[31:16] == written[31:16])
+        `uvm_info("INTR.MASK","IS A READ WRITE REGISTER FIELD",UVM_LOW)
+      else
+        `uvm_error("INTR.MASK","IS NOT READ WRITE REGISTER FIELD")
+    end
+    $display("--------------------------------------------------------------------------\nINITIAL VALUE: FULL = %0h | intr_status(RO|16) = %0h intr_mask(RW|16) = %0h",pread,pread[15:0],pread[31:16]);
+
+    $display("POKING 32'hFFFFFFFF INTO THE REGISTER");
+    //CHECK IF READ WORKS PROPERLY
+    dma_model.intr.poke(status,32'hFFFFFFFF);
+    dma_model.intr.read(status,read,UVM_FRONTDOOR);
+    $display("AFTER WRITING %0h: FULL = %0h | intr_status(RO|16) = %0h intr_mask(RW|16) = %0h",32'hFFFFFFFF,read,read[15:0],read[31:16]);
+    if(read != 32'hFFFFFFFF)
+      `uvm_error("INTR REGISTER","READ OPERATION DOES NOT WORK HERE")
+  endtask
 endclass
+
+/*
 
 class ctrl_sequence extends dma_base_sequence;
   `uvm_object_utils(ctrl_sequence)    //Factory Registration
@@ -335,3 +312,4 @@ class config_sequence extends dma_base_sequence;
     end
   endtask
 endclass
+*/

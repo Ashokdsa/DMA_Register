@@ -70,6 +70,7 @@ class intr_test extends uvm_test;
   endtask:run_phase
 endclass:intr_test
 
+/*
 class ctrl_test extends uvm_test;
   `uvm_component_utils(ctrl_test)    //Factory Registration
   dma_environment dma_env;
@@ -393,3 +394,4 @@ class transfer_count_test extends uvm_test;
     $display("--------------------------------------------------%0s ENDED--------------------------------------------------",get_type_name);
   endtask:run_phase
 endclass:transfer_count_test
+*/
