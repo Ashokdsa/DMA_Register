@@ -28,6 +28,12 @@ module dma_top;
     $dumpvars(0);
   end
 
+  initial begin
+    vif.rst_n = 0;
+    @(posedge clk);
+    vif.rst_n = 1;
+  end
+
   initial begin:test_run
     run_test("dma_base_test");      // Start UVM test
     $finish;

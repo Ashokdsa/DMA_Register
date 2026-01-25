@@ -17,7 +17,7 @@ class dma_monitor extends uvm_monitor;
   endfunction:build_phase
 
   virtual task run_phase(uvm_phase phase);
-    @(vif.mon_cb);
+    repeat(1)@(vif.mon_cb);
     forever begin
       repeat(3)@(vif.mon_cb);
       seq_item = dma_sequence_item::type_id::create("seq_item");

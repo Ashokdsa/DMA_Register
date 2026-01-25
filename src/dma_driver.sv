@@ -14,6 +14,7 @@ class dma_driver extends uvm_driver #(dma_sequence_item);
   endfunction
   
   virtual task run_phase(uvm_phase phase);
+    @(vif.drv_cb);
     forever begin
       seq_item_port.get_next_item(req); 
         drive();
@@ -23,7 +24,6 @@ class dma_driver extends uvm_driver #(dma_sequence_item);
 
   virtual task drive();
     @(vif.drv_cb);
-    req.rdata = vif.drv_cb.rdata;
     if(req.rst_n == 1'b0)
     begin
       vif.drv_cb.rst_n <= 1'b0;
@@ -53,5 +53,6 @@ class dma_driver extends uvm_driver #(dma_sequence_item);
       UVM_MEDIUM)
     repeat(2)@(vif.drv_cb);
     req.rdata = vif.drv_cb.rdata;
+    `uvm_info(get_name,$sformatf("RDATA: %8h",req.rdata),UVM_MEDIUM);
   endtask
 endclass

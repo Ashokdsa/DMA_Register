@@ -35,6 +35,7 @@ class dma_base_sequence extends uvm_sequence#(dma_sequence_item); //BASE sequenc
   task check_RO(uvm_reg main,uvm_reg_field regi, uvm_status_e status,int sz,int pos);
     bit[31:0] chk;
     bit[31:0] written,read,pread;
+    main.read(status,pread,UVM_FRONTDOOR);
     main.read(status,pread,UVM_BACKDOOR);
     $display("--------------------------------------------------------------------------\n%0t | BEFORE CLEAR %8h",$time,pread);
     proper_val(pos,sz,read,pread);
@@ -58,6 +59,7 @@ class dma_base_sequence extends uvm_sequence#(dma_sequence_item); //BASE sequenc
 
   task check_RW(uvm_reg main, uvm_reg_field regi, uvm_status_e status,int sz,int pos);
     bit[31:0] written,read,pread;
+    main.read(status,pread,UVM_FRONTDOOR);
     main.read(status,pread,UVM_BACKDOOR);
     proper_val(pos,sz,read,pread);
     written = pread >> pos;
@@ -79,6 +81,7 @@ class dma_base_sequence extends uvm_sequence#(dma_sequence_item); //BASE sequenc
 
   task check_RW1C(uvm_reg main, uvm_reg_field regi, uvm_status_e status,int pos);
     bit[31:0] written,read,pread;
+    main.read(status,pread,UVM_FRONTDOOR);
     main.read(status,pread,UVM_BACKDOOR);
     for(int i = 0; i < 32; i++) //ENSURES ONLY THE DATA OF THE FIELD IS SHOWN
     begin:valid_read
@@ -158,7 +161,6 @@ class intr_sequence extends dma_base_sequence;
 
   task body();
     uvm_status_e status;
-    dma_model.reset();
     repeat(10) begin
       check_RO(dma_model.intr,dma_model.intr.intr_status,status,16,0);
       check_RW(dma_model.intr,dma_model.intr.intr_mask,status,16,16);
@@ -176,7 +178,6 @@ class ctrl_sequence extends dma_base_sequence;
 
   task body();
     uvm_status_e status;
-    dma_model.reset();
     repeat(10) begin
       check_RW(dma_model.ctrl,dma_model.ctrl.start_dma,status,1,0);
       check_RW(dma_model.ctrl,dma_model.ctrl.w_count,status,15,1);
@@ -196,7 +197,6 @@ class io_addr_sequence extends dma_base_sequence;
 
   task body();
     uvm_status_e status;
-    dma_model.reset();
     repeat(10) begin
       check_RW(dma_model.io_addr,dma_model.io_addr.io_addr,status,32,0);
     end
@@ -213,7 +213,6 @@ class mem_addr_sequence extends dma_base_sequence;
 
   task body();
     uvm_status_e status;
-    dma_model.reset();
     repeat(10) begin
       check_RW(dma_model.mem_addr,dma_model.mem_addr.mem_addr,status,32,0);
     end
@@ -230,7 +229,6 @@ class status_sequence extends dma_base_sequence;
 
   task body();
     uvm_status_e status;
-    dma_model.reset();
     repeat(10) begin
       check_RO(dma_model.status,dma_model.status.busy,status,1,0);
       check_RO(dma_model.status,dma_model.status.done,status,1,1);
@@ -253,7 +251,6 @@ class extra_info_sequence extends dma_base_sequence;
 
   task body();
     uvm_status_e status;
-    dma_model.reset();
     repeat(10) begin
       check_RW(dma_model.extra_info,dma_model.extra_info.extra_info,status,32,0);
     end
@@ -270,7 +267,6 @@ class transfer_count_sequence extends dma_base_sequence;
 
   task body();
     uvm_status_e status;
-    dma_model.reset();
     repeat(10) begin
       check_RO(dma_model.transfer_count,dma_model.transfer_count.transfer_count,status,32,0);
     end
@@ -287,7 +283,6 @@ class descriptor_addr_sequence extends dma_base_sequence;
 
   task body();
     uvm_status_e status;
-    dma_model.reset();
     repeat(10) begin
       check_RW(dma_model.descriptor_addr,dma_model.descriptor_addr.descriptor_addr,status,32,0);
     end
@@ -304,7 +299,6 @@ class error_status_sequence extends dma_base_sequence;
 
   task body();
     uvm_status_e status;
-    dma_model.reset();
 
     repeat(10) begin
       check_RW1C(dma_model.error_status,dma_model.error_status.bus_error,status,0);
@@ -329,7 +323,6 @@ class config_sequence extends dma_base_sequence;
 
   task body();
     uvm_status_e status;
-    dma_model.reset();
 
     repeat(10) begin
       check_RW(dma_model.configu,dma_model.configu.prioriti,status,2,0);
