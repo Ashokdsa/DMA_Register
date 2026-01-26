@@ -2,7 +2,18 @@ package dma_pkg;
   `include "uvm_macros.svh"
   import uvm_pkg::*;
   `include "dma_sequence_item.sv"  
-  `include "dma_register.sv"
+  //REGISTER CONFIGURATION FILES
+  `include "registers/config_reg.sv"
+  `include "registers/ctrl_reg.sv" 
+  `include "registers/descriptor_addr_reg.sv"
+  `include "registers/error_status_reg.sv"
+  `include "registers/extra_info_reg.sv"
+  `include "registers/intr_reg.sv"
+  `include "registers/io_addr_reg.sv"
+  `include "registers/mem_addr_reg.sv"
+  `include "registers/status_reg.sv"
+  `include "registers/transfer_count_reg.sv"
+
   `include "dma_reg_block.sv"
   `include "dma_adapter.sv"        
 
