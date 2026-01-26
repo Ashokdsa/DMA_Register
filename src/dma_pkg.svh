@@ -19,6 +19,7 @@ package dma_pkg;
   `include "tests/sequences/mem_addr_sequence.sv"
   `include "tests/sequences/status_sequence.sv"
   `include "tests/sequences/transfer_count_sequence.sv"
+  `include "tests/sequences/regression_sequence.sv"
 
   `include "dma_monitor.sv"        
   `include "dma_driver.sv"         
@@ -40,4 +41,5 @@ package dma_pkg;
   `include "tests/reset_all_test.sv"
   `include "tests/status_test.sv"
   `include "tests/transfer_count_test.sv"
+  `include "tests/regression_test.sv"
 endpackage
