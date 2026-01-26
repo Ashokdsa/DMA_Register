@@ -7,7 +7,7 @@ class intr_reg extends uvm_reg;
     option.per_instance = 1;
     mask_cp: coverpoint intr_mask.value
     {
-      bins intr_mas[17] = {[0:$]};
+      bins intr_mas[] = {[0:32'h8000]} with ($onehot0(item));
     }
   endgroup
 

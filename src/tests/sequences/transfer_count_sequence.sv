@@ -37,6 +37,7 @@ class transfer_count_sequence extends dma_base_sequence;
       $display("WRITING VALUE = %0h",written);
       dma_model.transfer_count.write(status,written,UVM_FRONTDOOR);
       dma_model.transfer_count.peek(status,read);
+      dma_model.transfer_count.predict(read);
       $display("AFTER WRITING %0h: transfer_count(RO|32) = %0h",written,read);
 
       //CHECK FOR RO FIELD

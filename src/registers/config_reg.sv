@@ -5,12 +5,30 @@ class config_reg extends uvm_reg;
 
   covergroup config_cg;
     option.per_instance = 1;
-    prioriti_cp: coverpoint prioriti.value;
-    auto_restart_cp: coverpoint auto_restart.value;
-    interrupt_enable_cp: coverpoint interrupt_enable.value;
-    burst_size_cp: coverpoint burst_size.value;
-    data_width_cp: coverpoint data_width.value;
-    descriptor_mode_cp: coverpoint descriptor_mode.value;
+    prioriti_cp: coverpoint prioriti.value
+    {
+      bins val[] = {0,1,2};
+    }
+    auto_restart_cp: coverpoint auto_restart.value
+    {
+      bins val[] = {[0:1]};
+    }
+    interrupt_enable_cp: coverpoint interrupt_enable.value
+    {
+      bins val[] = {[0:1]};
+    }
+    burst_size_cp: coverpoint burst_size.value
+    {
+      bins val[] = {0,1,2};
+    }
+    data_width_cp: coverpoint data_width.value
+    {
+      bins val[] = {0,1,2};
+    }
+    descriptor_mode_cp: coverpoint descriptor_mode.value
+    {
+      bins val[] = {[0:1]};
+    }
   endgroup
 
   function new(string name = "config_reg");

@@ -10,9 +10,10 @@ class dma_subscriber extends uvm_subscriber#(dma_sequence_item);
     {
       bins to_cover[] = {'h400,'h404,'h408,'h40C,'h410,'h414,'h418,'h41C,'h420,'h424};
     }
-    wdata_cp: coverpoint seq.wdata;
-    rdata_cp: coverpoint seq.rdata;
-
+    wdata_cp: coverpoint seq.wdata
+    {
+      bins val[] = {[0:$]} with ($onehot0(item));
+    }
     wrxaddr: cross wr_en_cp,addr_cp
     {
       bins normal = binsof(wr_en_cp) intersect {1'b1};

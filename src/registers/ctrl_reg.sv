@@ -5,12 +5,18 @@ class ctrl_reg extends uvm_reg;
 
   covergroup ctrl_cg;
     option.per_instance = 1;
-    start_cp: coverpoint start_dma.value;
+    start_cp: coverpoint start_dma.value
+    {
+      bins val[] = {0,1};
+    }
     w_count_cp: coverpoint w_count.value
     {
-      bins w_count_bin[16] = {[0:$]};
+      bins w_count_bin[] = {[0:32'h4000]} with ($onehot0(item));
     }
-    io_mem_cp: coverpoint io_mem.value;
+    io_mem_cp: coverpoint io_mem.value
+    {
+      bins val[] = {0,1};
+    }
   endgroup
 
   function new(string name = "ctrl_reg");

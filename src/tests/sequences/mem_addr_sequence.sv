@@ -37,6 +37,7 @@ class mem_addr_sequence extends dma_base_sequence;
       $display("WRITING VALUE = %0h",written);
       dma_model.mem_addr.write(status,written,UVM_FRONTDOOR);
       dma_model.mem_addr.peek(status,read);
+      dma_model.mem_addr.predict(read);
       $display("AFTER WRITING %0h: mem_addr(RW|32) = %0h",written,read);
 
       //CHECK FOR RW FIELD

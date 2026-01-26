@@ -6,7 +6,7 @@ class extra_info_reg extends uvm_reg;
     option.per_instance = 1;
     extra_info_cp: coverpoint extra_info.value
     {
-      bins extra_info_bin[33] = {[0:$]};
+      bins extra_info_bin[] = {[0:32'h80000000]} with ($onehot0(item));
     }
   endgroup
 

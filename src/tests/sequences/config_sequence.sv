@@ -38,6 +38,7 @@ class config_sequence extends dma_base_sequence;
       $display("WRITING VALUE = %0h",written);
       dma_model.configu.write(status,written,UVM_FRONTDOOR);
       dma_model.configu.peek(status,read);
+      dma_model.configu.predict(read);
       $display("AFTER WRITING %0h: FULL = %0h | priority(RW|2) = %0h auto_restart(RW|1) = %0h interrupt_enable(RW|1) = %0h burst_size(RW|2) = %0h data_width(RW|2) = %0h descriptor_mode(RW|1) = %0h",written,read[8:0],read[1:0],read[2],read[3],read[5:4],read[7:6],read[8]);
 
       //CHECK FOR RW FIELDS

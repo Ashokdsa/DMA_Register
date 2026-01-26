@@ -1,5 +1,5 @@
 QUESTA := /home/share/questa
-TEST ?= reset_all_test
+TEST ?= regression_test
 V ?= UVM_NONE
 SHELL := /bin/bash
 

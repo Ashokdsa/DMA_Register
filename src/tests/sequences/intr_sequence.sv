@@ -39,6 +39,7 @@ class intr_sequence extends dma_base_sequence;
       dma_model.intr.write(status,written,UVM_FRONTDOOR);
 
       dma_model.intr.peek(status,read);
+      dma_model.intr.predict(read);
       $display("AFTER WRITING %0h: FULL = %0h | intr_status(RO|16) = %0h intr_mask(RW|16) = %0h",written,read,read[15:0],read[31:16]);
 
       //CHECK FOR RO FIELD

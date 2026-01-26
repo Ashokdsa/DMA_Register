@@ -40,6 +40,7 @@ class error_status_sequence extends dma_base_sequence;
       dma_model.error_status.write(status,written,UVM_FRONTDOOR);
 
       dma_model.error_status.peek(status,read);
+      dma_model.error_status.predict(read);
       $display("AFTER WRITING %0h: FULL = %0h | bus_error(RW1C|1) = %0h timeout_error(RW1C|1) = %0h alignment_error(RW1C|1) = %0h overflow_error(RW1C|1) = %0h underflow_error(RW1C|1) = %0h error_code(RO|8) = %0h error_addr_offset(RO|16) = %0h",written,read,read[0],read[1],read[2],read[3],read[4],read[15:8],read[31:16]);
 
       if(|(written[4:0]) == 1'b1)

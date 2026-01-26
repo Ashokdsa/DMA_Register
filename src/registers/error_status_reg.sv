@@ -5,11 +5,26 @@ class error_status_reg extends uvm_reg;
 
   covergroup error_status_cg;
     option.per_instance = 1;
-    bus_error_cp: coverpoint bus_error.value;
-    timeout_error_cp: coverpoint timeout_error.value;
-    alignment_error_cp: coverpoint alignment_error.value;
-    overflow_error_cp: coverpoint overflow_error.value;
-    underflow_error_cp: coverpoint underflow_error.value;
+    bus_error_cp: coverpoint bus_error.value
+    {
+      bins val[] = {0,1};
+    }
+    timeout_error_cp: coverpoint timeout_error.value
+    {
+      bins val[] = {0,1};
+    }
+    alignment_error_cp: coverpoint alignment_error.value
+    {
+      bins val[] = {0,1};
+    }
+    overflow_error_cp: coverpoint overflow_error.value
+    {
+      bins val[] = {0,1};
+    }
+    underflow_error_cp: coverpoint underflow_error.value
+    {
+      bins val[] = {0,1};
+    }
   endgroup
 
   function new(string name = "error_status_reg");

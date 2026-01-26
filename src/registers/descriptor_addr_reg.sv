@@ -6,7 +6,7 @@ class descriptor_addr_reg extends uvm_reg;
     option.per_instance = 1;
     descriptor_addr_cp: coverpoint descriptor_addr.value
     {
-      bins descriptor_addr_bin[32] = {[0:$]};
+      bins descriptor_addr_bin[] = {[0:32'h80000000]} with ($onehot0(item));
     }
   endgroup
 

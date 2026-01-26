@@ -6,7 +6,7 @@ class mem_addr_reg extends uvm_reg;
     option.per_instance = 1;
     mem_addr_cp: coverpoint mem_addr.value
     {
-      bins mem_addr_bin[33] = {[0:$]};
+      bins mem_addr_bin[33] = {[0:32'h80000000]} with ($onehot0(item));
     }
   endgroup
 
