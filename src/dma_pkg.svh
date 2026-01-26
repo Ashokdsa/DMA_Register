@@ -1,6 +1,3 @@
-`include "uvm_macros.svh"
-import uvm_pkg::*;
-
 package dma_pkg;
   `include "uvm_macros.svh"
   import uvm_pkg::*;
@@ -8,7 +5,21 @@ package dma_pkg;
   `include "dma_register.sv"
   `include "dma_reg_block.sv"
   `include "dma_adapter.sv"        
-  `include "dma_sequence.sv"   
+
+  //ALL SEQUENCES
+  `include "tests/sequences/dma_sequence.sv"
+  `include "tests/sequences/reset_all_sequence.sv"
+  `include "tests/sequences/config_sequence.sv"
+  `include "tests/sequences/ctrl_sequence.sv"
+  `include "tests/sequences/descriptor_addr_sequence.sv"
+  `include "tests/sequences/error_status_sequence.sv"
+  `include "tests/sequences/extra_info_sequence.sv"
+  `include "tests/sequences/intr_sequence.sv"
+  `include "tests/sequences/io_addr_sequence.sv"
+  `include "tests/sequences/mem_addr_sequence.sv"
+  `include "tests/sequences/status_sequence.sv"
+  `include "tests/sequences/transfer_count_sequence.sv"
+
   `include "dma_monitor.sv"        
   `include "dma_driver.sv"         
   `include "dma_sequencer.sv"
@@ -16,5 +27,17 @@ package dma_pkg;
   `include "dma_subscriber.sv"
   `include "dma_environment.sv"   
   `include "dma_report_server.sv"   
-  `include "dma_test.sv"
+
+  //ALL TESTS
+  `include "tests/config_test.sv"
+  `include "tests/ctrl_test.sv"
+  `include "tests/descriptor_addr_test.sv"
+  `include "tests/error_status_test.sv"
+  `include "tests/extra_info_test.sv"
+  `include "tests/intr_test.sv"
+  `include "tests/io_addr_test.sv"
+  `include "tests/mem_addr_test.sv"
+  `include "tests/reset_all_test.sv"
+  `include "tests/status_test.sv"
+  `include "tests/transfer_count_test.sv"
 endpackage
