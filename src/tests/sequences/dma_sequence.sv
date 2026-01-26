@@ -15,7 +15,10 @@ class dma_base_sequence extends uvm_sequence#(dma_sequence_item); //BASE sequenc
       val.push_back(i);
       i = i << 1;
     end
-    $display("VAL = %0p",val);
+    $write("VAL = ");
+    foreach(val[i])
+      $write("%0h ",val[i]);
+    $display();
   endfunction:new
 
   task body();

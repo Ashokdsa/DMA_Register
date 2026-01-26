@@ -37,7 +37,7 @@ class extra_info_sequence extends dma_base_sequence;
       $display("WRITING VALUE = %0h",written);
       dma_model.extra_info.write(status,written,UVM_FRONTDOOR);
       dma_model.extra_info.peek(status,read);
-      $display("AFTER WRITING %0h: extra_info(RW|32) = %0h",written,pread);
+      $display("AFTER WRITING %0h: extra_info(RW|32) = %0h",written,read);
 
       //CHECK FOR RW FIELD
       if(read == written)

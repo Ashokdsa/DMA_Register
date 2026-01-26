@@ -39,7 +39,7 @@ class status_sequence extends dma_base_sequence;
       $display("WRITING VALUE = %0h",written);
       dma_model.status.write(status,written,UVM_FRONTDOOR);
       dma_model.status.peek(status,read);
-      $display("AFTER WRITING %0h: FULL = %0h | busy(RO|1) = %0h done(RO|1) = %0h error(RO|1) = %0h paused(RO|1) = %0h current_state(RO|4) = %0h fifo_level(RO|8) = %0h",written,pread[15:0],pread[0],pread[1],pread[2],pread[3],pread[7:4],pread[15:8]);
+      $display("AFTER WRITING %0h: FULL = %0h | busy(RO|1) = %0h done(RO|1) = %0h error(RO|1) = %0h paused(RO|1) = %0h current_state(RO|4) = %0h fifo_level(RO|8) = %0h",written,read[15:0],read[0],read[1],read[2],read[3],read[7:4],read[15:8]);
 
       //CHECK FOR RO FIELD
       if(read[15:0] == pread[15:0])
@@ -53,7 +53,7 @@ class status_sequence extends dma_base_sequence;
     //CHECK IF READ WORKS PROPERLY
     dma_model.status.poke(status,32'h0000FFFF);
     dma_model.status.read(status,read,UVM_FRONTDOOR);
-    $display("AFTER WRITING %0h: FULL = %0h | busy(RO|1) = %0h done(RO|1) = %0h error(RO|1) = %0h paused(RO|1) = %0h current_state(RO|4) = %0h fifo_level(RO|8) = %0h",32'h0000FFFF,pread[15:0],pread[0],pread[1],pread[2],pread[3],pread[7:4],pread[15:8]);
+    $display("AFTER WRITING %0h: FULL = %0h | busy(RO|1) = %0h done(RO|1) = %0h error(RO|1) = %0h paused(RO|1) = %0h current_state(RO|4) = %0h fifo_level(RO|8) = %0h",32'h0000FFFF,read[15:0],read[0],read[1],read[2],read[3],read[7:4],read[15:8]);
     if(read != 32'h0000FFFF)
       `uvm_error("STATUS REGISTER","READ OPERATION DOES NOT WORK HERE")
   endtask

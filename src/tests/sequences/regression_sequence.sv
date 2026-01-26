@@ -33,7 +33,7 @@ class regression_sequence extends dma_base_sequence;
     extra_info_seq.rst = 0; 
     status_seq.rst = 0; 
     transfer_count_seq.rst = 0; 
-    descriptor_addr_seq.rst = 0;q
+    descriptor_addr_seq.rst = 0;
     error_status_seq.rst = 0; 
     config_seq.rst = 0; 
   endfunction:new

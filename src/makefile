@@ -1,6 +1,6 @@
 QUESTA := /home/share/questa
 TEST ?= reset_all_test
-V ?= UVM_MEDIUM
+V ?= UVM_NONE
 SHELL := /bin/bash
 
 .ONESHELL:

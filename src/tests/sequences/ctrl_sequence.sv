@@ -40,7 +40,7 @@ class ctrl_sequence extends dma_base_sequence;
       dma_model.ctrl.write(status,written,UVM_FRONTDOOR);
 
       dma_model.ctrl.peek(status,read);
-      $display("AFTER WRITING %0h: FULL = %0h | start_dma(RW|1) = %0h w_count(RW|15) = %0h io_mem(RW|1) = %0h",written,pread[16:0],pread[0],pread[15:1],pread[16]);
+      $display("AFTER WRITING %0h: FULL = %0h | start_dma(RW|1) = %0h w_count(RW|15) = %0h io_mem(RW|1) = %0h",written,read[16:0],read[0],read[15:1],read[16]);
 
       //CHECK FOR RW FIELD
       if(read[16:0] == written[16:0])
@@ -54,7 +54,7 @@ class ctrl_sequence extends dma_base_sequence;
     //CHECK IF READ WORKS PROPERLY
     dma_model.ctrl.poke(status,32'h1FFFF);
     dma_model.ctrl.read(status,read,UVM_FRONTDOOR);
-    $display("AFTER WRITING %0h: FULL = %0h | start_dma(RW|1) = %0h w_count(RW|15) = %0h io_mem(RW|1) = %0h",32'h1FFFF,pread[16:0],pread[0],pread[15:1],pread[16]);
+    $display("AFTER WRITING %0h: FULL = %0h | start_dma(RW|1) = %0h w_count(RW|15) = %0h io_mem(RW|1) = %0h",32'h1FFFF,read[16:0],read[0],read[15:1],read[16]);
     if(read != 32'h0001FFFF)
       `uvm_error("CTRL REGISTER","READ OPERATION DOES NOT WORK HERE")
   endtask

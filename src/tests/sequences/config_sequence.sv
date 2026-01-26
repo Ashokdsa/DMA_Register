@@ -38,7 +38,7 @@ class config_sequence extends dma_base_sequence;
       $display("WRITING VALUE = %0h",written);
       dma_model.configu.write(status,written,UVM_FRONTDOOR);
       dma_model.configu.peek(status,read);
-      $display("AFTER WRITING %0h: FULL = %0h | priority(RW|2) = %0h auto_restart(RW|1) = %0h interrupt_enable(RW|1) = %0h burst_size(RW|2) = %0h data_width(RW|2) = %0h descriptor_mode(RW|1) = %0h",written,pread[8:0],pread[1:0],pread[2],pread[3],pread[5:4],pread[7:6],pread[8]);
+      $display("AFTER WRITING %0h: FULL = %0h | priority(RW|2) = %0h auto_restart(RW|1) = %0h interrupt_enable(RW|1) = %0h burst_size(RW|2) = %0h data_width(RW|2) = %0h descriptor_mode(RW|1) = %0h",written,read[8:0],read[1:0],read[2],read[3],read[5:4],read[7:6],read[8]);
 
       //CHECK FOR RW FIELDS
       if(read[8:0] == written[8:0])
@@ -52,7 +52,7 @@ class config_sequence extends dma_base_sequence;
     //CHECK IF READ WORKS PROPERLY
     dma_model.configu.poke(status,32'h000001FF);
     dma_model.configu.read(status,read,UVM_FRONTDOOR);
-    $display("AFTER WRITING %0h: FULL = %0h | priority(RW|2) = %0h auto_restart(RW|1) = %0h interrupt_enable(RW|1) = %0h burst_size(RW|2) = %0h data_width(RW|2) = %0h descriptor_mode(RW|1) = %0h",32'h000001FF,pread[8:0],pread[1:0],pread[2],pread[3],pread[5:4],pread[7:6],pread[8]);
+    $display("AFTER WRITING %0h: FULL = %0h | priority(RW|2) = %0h auto_restart(RW|1) = %0h interrupt_enable(RW|1) = %0h burst_size(RW|2) = %0h data_width(RW|2) = %0h descriptor_mode(RW|1) = %0h",32'h000001FF,read[8:0],read[1:0],read[2],read[3],read[5:4],read[7:6],read[8]);
     if(read != 32'h000001FF)
       `uvm_error("CONFIG REGISTER","READ OPERATION DOES NOT WORK HERE")
   endtask
