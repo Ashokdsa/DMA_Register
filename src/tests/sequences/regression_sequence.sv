@@ -25,6 +25,20 @@ class regression_sequence extends dma_base_sequence;
     descriptor_addr_seq = descriptor_addr_sequence::type_id::create("descriptor_addr_sequence");
     error_status_seq    = error_status_sequence::type_id::create("error_status_sequence");
     config_seq          = config_sequence::type_id::create("config_sequence");
+  endfunction:new
+
+  task pre_body();
+    reset_all_seq.dma_model = dma_model; 
+    intr_seq.dma_model = dma_model; 
+    ctrl_seq.dma_model = dma_model; 
+    io_addr_seq.dma_model = dma_model; 
+    mem_addr_seq.dma_model = dma_model; 
+    extra_info_seq.dma_model = dma_model; 
+    status_seq.dma_model = dma_model; 
+    transfer_count_seq.dma_model = dma_model; 
+    descriptor_addr_seq.dma_model = dma_model;
+    error_status_seq.dma_model = dma_model; 
+    config_seq.dma_model = dma_model; 
 
     intr_seq.rst = 0; 
     ctrl_seq.rst = 0; 
@@ -36,20 +50,20 @@ class regression_sequence extends dma_base_sequence;
     descriptor_addr_seq.rst = 0;
     error_status_seq.rst = 0; 
     config_seq.rst = 0; 
-  endfunction:new
+  endtask
 
   task body();
     $display("------------------------REGRESSION-TESTING------------------------");
-    `uvm_do(reset_all_seq)
-    `uvm_do(intr_seq)
-    `uvm_do(ctrl_seq)
-    `uvm_do(io_addr_seq)
-    `uvm_do(mem_addr_seq)
-    `uvm_do(extra_info_seq)
-    `uvm_do(status_seq)
-    `uvm_do(transfer_count_seq)
-    `uvm_do(descriptor_addr_seq)
-    `uvm_do(error_status_seq)
-    `uvm_do(config_seq)
+    reset_all_seq.start(m_sequencer);
+    intr_seq.start(m_sequencer);
+    ctrl_seq.start(m_sequencer);
+    io_addr_seq.start(m_sequencer);
+    mem_addr_seq.start(m_sequencer);
+    extra_info_seq.start(m_sequencer);
+    status_seq.start(m_sequencer);
+    transfer_count_seq.start(m_sequencer);
+    descriptor_addr_seq.start(m_sequencer);
+    error_status_seq.start(m_sequencer);
+    config_seq.start(m_sequencer);
   endtask
 endclass
