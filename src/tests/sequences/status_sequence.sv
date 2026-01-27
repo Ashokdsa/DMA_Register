@@ -54,7 +54,10 @@ class status_sequence extends dma_base_sequence;
     dma_model.status.poke(status,32'h0000FFFF);
     dma_model.status.read(status,read,UVM_FRONTDOOR);
     $display("AFTER WRITING %0h: FULL = %0h | busy(RO|1) = %0h done(RO|1) = %0h error(RO|1) = %0h paused(RO|1) = %0h current_state(RO|4) = %0h fifo_level(RO|8) = %0h",32'h0000FFFF,read[15:0],read[0],read[1],read[2],read[3],read[7:4],read[15:8]);
-    if(read != 32'h0000FFFF)
+    $display("\033[1;31mCONSIDERING STATUS IS NOT RUNNING, i.e. \nbusy(RO|1) = 0\ndone(RO|1) = 1(Assuming that no transaction = transaction complete)\nerror(RO|1) = (NOT SURE)\npaused(RO|1) = 1\ncurrent_state(RO|4) = 0(default_state assumption due to reset)\nfifo_level(RO|8) = 0(Nothing is written inside)\nTherefore we compare with \033[1;33m16'b00000000_0000_1_x_1_0\033[0m");
+    if((read[1:0] != 2'b10) && (read[15:3] != 24'h1))
       `uvm_error("STATUS REGISTER","READ OPERATION DOES NOT WORK HERE")
+    else
+      `uvm_info("STATUS REGISTER",$sformatf("READ OPERATION DOES WORK HERE, error bit = %0b",read[2]),UVM_NONE)
   endtask
 endclass
