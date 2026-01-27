@@ -30,7 +30,7 @@ class dma_adapter extends uvm_reg_adapter;
     rw.addr = tr.addr; 
 
     rw.status = UVM_IS_OK;
-    `uvm_warning(get_type_name,$sformatf("BUS2REG CALLED WITH wr_en = %0b rd_en = %0b addr = %3h wdata = %8h rdata = %8h",tr.wr_en,tr.rd_en,tr.addr,tr.wdata,tr.rdata))
+    `uvm_info(get_type_name,$sformatf("BUS2REG CALLED WITH wr_en = %0b rd_en = %0b addr = %3h wdata = %8h rdata = %8h",tr.wr_en,tr.rd_en,tr.addr,tr.wdata,tr.rdata),UVM_HIGH)
   endfunction
 
 endclass

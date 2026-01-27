@@ -9,18 +9,23 @@ class transfer_count_sequence extends dma_base_sequence;
     int i;
     uvm_status_e status;
     $display("------------------------TESTING TRANSFER_COUNT REGISTER------------------------");
+    //RESET IF SEQUENCE IS CALLED ALONE
+    if(rst)
+    begin
+      dma_model.transfer_count.reset();
+      rst_compare(dma_model.transfer_count,status);
+      rst = 0;
+    end
+    //FOR PREDICTABLE VALUES
+    `uvm_info("TRANSFER_COUNT SEQ","BACKDOOR WRITING 0 TO CTRL REG AND THEN POKING 0 TO STATUS AND TRANSFER_COUNT",UVM_HIGH)
+    dma_model.ctrl.write(status,32'h00000000,UVM_BACKDOOR);
+    dma_model.status.poke(status,32'h00000000);
+    dma_model.transfer_count.poke(status,32'h00000000);
     repeat(32) begin
-      //RESET IF SEQUENCE IS CALLED ALONE
       $write("VAL = ");
       foreach(val[i])
         $write("%0h ",val[i]);
       $display();
-      if(rst)
-      begin
-        dma_model.transfer_count.reset();
-        rst_compare(dma_model.transfer_count,status);
-        rst = 0;
-      end
       dma_model.transfer_count.peek(status,pread);
       $display("--------------------------------------------------------------------------\nINITIAL VALUE: transfer_count(RO|32) = %0h",pread);
       written = pread;
