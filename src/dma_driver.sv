@@ -53,6 +53,10 @@ class dma_driver extends uvm_driver #(dma_sequence_item);
       UVM_MEDIUM)
     repeat(2)@(vif.drv_cb);
     req.rdata = vif.drv_cb.rdata;
+    vif.drv_cb.wr_en <= 1'b0;
+    vif.drv_cb.rd_en <= 1'b0;
+    vif.drv_cb.wdata <= 'h00000000;
+    vif.drv_cb.addr  <= 'h00000000;
     `uvm_info(get_name,$sformatf("RDATA: %8h",req.rdata),UVM_MEDIUM);
   endtask
 endclass
