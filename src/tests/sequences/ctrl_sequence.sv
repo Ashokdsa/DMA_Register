@@ -40,7 +40,6 @@ class ctrl_sequence extends dma_base_sequence;
       dma_model.ctrl.write(status,written,UVM_FRONTDOOR);
 
       dma_model.ctrl.peek(status,read);
-      dma_model.ctrl.predict(read);
       $display("AFTER WRITING %0h: FULL = %0h | start_dma(RW|1) = %0h w_count(RW|15) = %0h io_mem(RW|1) = %0h",written,read[16:0],read[0],read[15:1],read[16]);
 
       //CHECK FOR RW FIELD

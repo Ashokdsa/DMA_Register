@@ -6,7 +6,7 @@ class io_addr_reg extends uvm_reg;
     option.per_instance = 1;
     io_addr_cp: coverpoint io_addr.value
     {
-      bins io_addr_bin[] = {[0:32'h80000000]} with ($onehot(item));
+      bins io_addr_bin[] = {[0:32'h80000000]} with ($onehot0(item));
     }
   endgroup
 
