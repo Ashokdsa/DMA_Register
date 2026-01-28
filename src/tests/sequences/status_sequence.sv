@@ -52,10 +52,23 @@ class status_sequence extends dma_base_sequence;
       else
         `uvm_error("STATUS REGISTER","IS NOT READ ONLY REGISTER")
     end
-    $display("--------------------------------------------------------------------------\nINITIAL VALUE: FULL = %0h | busy(RO|1) = %0h done(RO|1) = %0h error(RO|1) = %0h paused(RO|1) = %0h current_state(RO|4) = %0h fifo_level(RO|8) = %0h",written,pread[15:0],pread[0],pread[1],pread[2],pread[3],pread[7:4],pread[15:8]);
+    $display("-----------------------------------%0t---------------------------------------\nINITIAL VALUE: FULL = %0h | busy(RO|1) = %0h done(RO|1) = %0h error(RO|1) = %0h paused(RO|1) = %0h current_state(RO|4) = %0h fifo_level(RO|8) = %0h",written,pread[15:0],pread[0],pread[1],pread[2],pread[3],pread[7:4],pread[15:8]);
 
-    $display("POKING 32'h0000FFFF INTO THE REGISTER");
+    $display("POKING 32'h0000FFFE INTO THE REGISTER");
     //CHECK IF READ WORKS PROPERLY
+    //STATUS_BUSY = 0
+    dma_model.status.poke(status,32'h0000FFFE);
+    dma_model.status.read(status,read,UVM_FRONTDOOR);
+    $display("AFTER WRITING %0h: FULL = %0h | busy(RO|1) = %0h done(RO|1) = %0h error(RO|1) = %0h paused(RO|1) = %0h current_state(RO|4) = %0h fifo_level(RO|8) = %0h",32'h0000FFFE,read[15:0],read[0],read[1],read[2],read[3],read[7:4],read[15:8]);
+    written = dma_model.transfer_count.transfer_count.value;
+    $display("\033[1;31m**********************************************************************\nCONSIDERING WE POKED busy = 0 at ctrl_start_dma = %1b checking transfer_count = %8h\nTherefore we compare with\033[0m \033[1;33m 16'b%16b\033[0m\033[1;31m\n**********************************************************************\033[0m",dma_model.ctrl.start_dma.value,dma_model.transfer_count.transfer_count.value,32'h0000FFFE);
+    if(read[15:0] != 32'h0000FFFE)
+      `uvm_error("STATUS REGISTER","READ OPERATION DOES NOT WORK HERE")
+    else
+      `uvm_info("STATUS REGISTER",$sformatf("READ OPERATION DOES WORK HERE, STATE = %4b",read[7:4]),UVM_NONE)
+
+    //STATUS_BUSY = 1
+    $display("--------------------------------------------------------------------------");
     dma_model.status.poke(status,32'h0000FFFF);
     dma_model.status.read(status,read,UVM_FRONTDOOR);
     $display("AFTER WRITING %0h: FULL = %0h | busy(RO|1) = %0h done(RO|1) = %0h error(RO|1) = %0h paused(RO|1) = %0h current_state(RO|4) = %0h fifo_level(RO|8) = %0h",32'h0000FFFF,read[15:0],read[0],read[1],read[2],read[3],read[7:4],read[15:8]);
@@ -66,14 +79,14 @@ class status_sequence extends dma_base_sequence;
       if((read[15:0] != {written[7:0],4'b0000,4'b1110}))
         `uvm_error("STATUS REGISTER","READ OPERATION DOES NOT WORK HERE")
       else
-        `uvm_info("STATUS REGISTER",$sformatf("READ OPERATION DOES WORK HERE, error bit = %0b",read[2]),UVM_NONE)
+        `uvm_info("STATUS REGISTER",$sformatf("READ OPERATION DOES WORK HERE, STATE = %4b",read[7:4]),UVM_NONE)
     end
     else
     begin
       if((read[15:0] != {written[7:0],4'b1111,4'b1111}))
         `uvm_error("STATUS REGISTER","READ OPERATION DOES NOT WORK HERE")
       else
-        `uvm_info("STATUS REGISTER",$sformatf("READ OPERATION DOES WORK HERE, error bit = %0b",read[2]),UVM_NONE)
+        `uvm_info("STATUS REGISTER",$sformatf("READ OPERATION DOES WORK HERE, STATE = %4b",read[7:4]),UVM_NONE)
     end
   endtask
 endclass
