@@ -45,15 +45,17 @@ class config_sequence extends dma_base_sequence;
         `uvm_info("CONFIG REGISTER","IS A READ WRITE REGISTER",UVM_LOW)
       else
         `uvm_error("CONFIG REGISTER","IS NOT READ WRITE REGISTER")
-    end
-    $display("--------------------------------------------------------------------------\nINITIAL VALUE: FULL = %0h | priority(RW|2) = %0h auto_restart(RW|1) = %0h interrupt_enable(RW|1) = %0h burst_size(RW|2) = %0h data_width(RW|2) = %0h descriptor_mode(RW|1) = %0h",pread[8:0],pread[1:0],pread[2],pread[3],pread[5:4],pread[7:6],pread[8]);
 
-    $display("POKING 32'h000001FF INTO THE REGISTER");
-    //CHECK IF READ WORKS PROPERLY
-    dma_model.configu.poke(status,32'h000001FF);
-    dma_model.configu.read(status,read,UVM_FRONTDOOR);
-    $display("AFTER WRITING %0h: FULL = %0h | priority(RW|2) = %0h auto_restart(RW|1) = %0h interrupt_enable(RW|1) = %0h burst_size(RW|2) = %0h data_width(RW|2) = %0h descriptor_mode(RW|1) = %0h",32'h000001FF,read[8:0],read[1:0],read[2],read[3],read[5:4],read[7:6],read[8]);
-    if(read != 32'h000001FF)
-      `uvm_error("CONFIG REGISTER","READ OPERATION DOES NOT WORK HERE")
+      //CHECKING FOR READ
+      $display("--------------------------------------------------------------------------\nINITIAL VALUE: FULL = %0h | priority(RW|2) = %0h auto_restart(RW|1) = %0h interrupt_enable(RW|1) = %0h burst_size(RW|2) = %0h data_width(RW|2) = %0h descriptor_mode(RW|1) = %0h",read[8:0],read[1:0],read[2],read[3],read[5:4],read[7:6],read[8]);
+      $display("POKING 32'h%0h INTO THE REGISTER",written);
+      dma_model.configu.poke(status,written);
+      dma_model.configu.read(status,read,UVM_FRONTDOOR);
+      $display("AFTER READING %0h: FULL = %0h | priority(RW|2) = %0h auto_restart(RW|1) = %0h interrupt_enable(RW|1) = %0h burst_size(RW|2) = %0h data_width(RW|2) = %0h descriptor_mode(RW|1) = %0h",32'h000001FF,read[8:0],read[1:0],read[2],read[3],read[5:4],read[7:6],read[8]);
+      if(read != written)
+        `uvm_error("CONFIG REGISTER","READ OPERATION DOES NOT WORK HERE")
+      else
+        `uvm_info("CONFIG REGISTER","READ OPERATION WORKS HERE",UVM_LOW)
+      end
   endtask
 endclass
