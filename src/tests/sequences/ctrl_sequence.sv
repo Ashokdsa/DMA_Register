@@ -64,7 +64,7 @@ class ctrl_sequence extends dma_base_sequence;
       dma_model.ctrl.read(status,read,UVM_FRONTDOOR);
 
       $display("AFTER READING %0h(LAST BIT BECOMES 0 AFTER WRITING 1): FULL = %0h | start_dma(RW|1) = %0h w_count(RW|15) = %0h io_mem(RW|1) = %0h",written,read[16:0],read[0],read[15:1],read[16]);
-      if(read[16:0] != written[16:0])
+      if((read[16:1] != written[16:1]) && (read[0] == 0)) //As the READ takes 3 cycles by then start_dma gets reset
         `uvm_error("CTRL REGISTER","READ OPERATION DOES NOT WORK HERE")
       else
         `uvm_info("CTRL REGISTER","READ OPERATION WORKS HERE",UVM_LOW)

@@ -39,7 +39,10 @@ class intr_sequence extends dma_base_sequence;
         begin
           //RANDOM INPUTS
           dma_model.intr.randomize();
-          written = (dma_model.intr.intr_status.value) | (dma_model.intr.intr_mask.value << 16); 
+          written = (dma_model.intr.intr_mask.value << 16); 
+          written[15:0] = $urandom();
+          if(written != pread)
+            `uvm_info("INTR VAL",$sformatf("\033[1;31mSTATUS = %0h MASK = %0h\033[0m",written[15:0],dma_model.intr.intr_mask.value),UVM_NONE)
         end
       end
       if(idx != 0) val.delete(idx-1);

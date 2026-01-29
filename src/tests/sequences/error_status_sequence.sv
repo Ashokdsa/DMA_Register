@@ -38,7 +38,9 @@ class error_status_sequence extends dma_base_sequence;
         else begin
           //RANDOM INPUTS
           dma_model.error_status.randomize();
-          written = ((dma_model.error_status.bus_error.value) | (dma_model.error_status.timeout_error.value << 1) | (dma_model.error_status.alignment_error.value << 2) | (dma_model.error_status.overflow_error.value << 3) | (dma_model.error_status.underflow_error.value << 4) | (dma_model.error_status.error_code.value << 8) | (dma_model.error_status.error_addr_offset.value << 16)) & 32'hFFFFFF1F; 
+          written = (dma_model.error_status.bus_error.value) | (dma_model.error_status.timeout_error.value << 1) | (dma_model.error_status.alignment_error.value << 2) | (dma_model.error_status.overflow_error.value << 3) | (dma_model.error_status.underflow_error.value << 4);
+          written[31:8] = $urandom();
+          written[7:5] = 3'b000;
         end
       end
 

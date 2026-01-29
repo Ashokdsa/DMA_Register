@@ -21,7 +21,7 @@ class transfer_count_sequence extends dma_base_sequence;
     dma_model.ctrl.write(status,32'h00000000,UVM_BACKDOOR);
     dma_model.status.poke(status,32'h00000000);
     dma_model.transfer_count.poke(status,32'h00000000);
-    repeat(32) begin
+    repeat(50) begin
       $write("VAL = ");
       foreach(val[i])
         $write("%0h ",val[i]);
@@ -40,8 +40,7 @@ class transfer_count_sequence extends dma_base_sequence;
         end
         else begin
           //RANDOM INPUTS
-          dma_model.transfer_count.randomize();
-          written = dma_model.transfer_count.transfer_count.value;
+          written = $urandom();
         end
       end
       if(idx != 0) val.delete(idx-1);

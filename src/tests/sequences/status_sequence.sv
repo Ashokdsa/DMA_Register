@@ -22,7 +22,7 @@ class status_sequence extends dma_base_sequence;
     dma_model.ctrl.write(status,32'h00000000,UVM_BACKDOOR);
     dma_model.status.poke(status,32'h00000000);
     dma_model.transfer_count.poke(status,32'h00000000);
-    repeat(16) begin
+    repeat(50) begin
       $write("VAL = ");
       foreach(val[i])
         $write("%0h ",val[i]);
@@ -43,8 +43,8 @@ class status_sequence extends dma_base_sequence;
         else
         begin
           //RANDOM
-          dma_model.status.randomize();
-          written = (dma_model.status.busy.value) | (dma_model.status.done.value << 1) | (dma_model.status.error.value << 2) | (dma_model.status.paused.value << 3) | (dma_model.status.current_state.value << 4) | (dma_model.status.fifo_level.value << 8); 
+          written[15:0] = $urandom();
+          written[31:16] = 16'h0000;
         end
       end
       if(idx != 0) val.delete(idx-1);
@@ -65,7 +65,7 @@ class status_sequence extends dma_base_sequence;
 
       //UPDATE MIRROR
       dma_model.transfer_count.peek(status,pread);
-      dma_model.dma_model.ctrl.w_count.peek(status,pread);
+      dma_model.ctrl.w_count.peek(status,pread);
 
       $display("POKING 32'h%0h INTO THE REGISTER",written);
       //CHECK IF READ WORKS PROPERLY
@@ -77,10 +77,11 @@ class status_sequence extends dma_base_sequence;
       pread[3:2] = written[3:2];
       dma_model.status.read(status,read,UVM_FRONTDOOR);
       $display("AFTER READING %0h: FULL = %0h | busy(RO|1) = %0h done(RO|1) = %0h error(RO|1) = %0h paused(RO|1) = %0h current_state(RO|4) = %0h fifo_level(RO|8) = %0h",written,read[15:0],read[0],read[1],read[2],read[3],read[7:4],read[15:8]);
-      $display("\033[1;31m**********************************************************************\nCONSIDERING WE POKED busy = 0 at ctrl_start_dma = %1b checking transfer_count = %8h\nTherefore we compare with\033[0m \033[1;33m 16'b%16b\033[0m\033[1;31m\n**********************************************************************\033[0m",dma_model.ctrl.start_dma.value,dma_model.transfer_count.transfer_count.value,pread);
+      $display("\033[1;31m**********************************************************************\nCONSIDERING WE POKED busy = 0 at ctrl_start_dma = %1b checking transfer_count = %8h\nTherefore we compare with\033[0m \033[1;33m 16'h%0h\033[0m\033[1;31m\n**********************************************************************\033[0m",dma_model.ctrl.start_dma.value,dma_model.transfer_count.transfer_count.value,pread);
       if(read[15:0] != pread[15:0])
         `uvm_error("STATUS REGISTER","READ OPERATION DOES NOT WORK HERE")
       else
         `uvm_info("STATUS REGISTER",$sformatf("READ OPERATION DOES WORK HERE, STATE = %4b",read[7:4]),UVM_NONE)
+    end
   endtask
 endclass

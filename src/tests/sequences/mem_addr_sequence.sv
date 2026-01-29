@@ -15,7 +15,7 @@ class mem_addr_sequence extends dma_base_sequence;
       rst_compare(dma_model.mem_addr,status);
       rst = 0;
     end
-    repeat(32) begin
+    repeat(50) begin
       //RESET IF SEQUENCE IS CALLED ALONE
       $write("VAL = ");
       foreach(val[i])

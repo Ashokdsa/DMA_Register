@@ -16,7 +16,7 @@ class io_addr_sequence extends dma_base_sequence;
       rst_compare(dma_model.io_addr,status);
       rst = 0;
     end
-    repeat(32) begin
+    repeat(50) begin
       $write("VAL = ");
       foreach(val[i])
         $write("%0h ",val[i]);

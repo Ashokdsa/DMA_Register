@@ -1,7 +1,6 @@
 class intr_reg extends uvm_reg;
   `uvm_object_utils(intr_reg)
-  rand uvm_reg_field intr_mask;
-  rand uvm_reg_field intr_status;
+  rand uvm_reg_field intr_mask, intr_status;
 
   covergroup intr_cg;
     option.per_instance = 1;
