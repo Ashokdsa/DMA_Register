@@ -1,7 +1,8 @@
 class error_status_reg extends uvm_reg;
   `uvm_object_utils(error_status_reg)
   rand uvm_reg_field bus_error,timeout_error,alignment_error,overflow_error,underflow_error;
-  uvm_reg_field Reserved,error_code,error_addr_offset;
+  rand uvm_reg_field error_code,error_addr_offset;
+  uvm_reg_field Reserved;
 
   covergroup error_status_cg;
     option.per_instance = 1;
@@ -124,7 +125,7 @@ class error_status_reg extends uvm_reg;
       .volatile(1),
       .reset('h00),
       .has_reset(1),
-      .is_rand(0),
+      .is_rand(1),
       .individually_accessible(1)
     );
     error_addr_offset = uvm_reg_field::type_id::create("error_addr_offset");
@@ -136,7 +137,7 @@ class error_status_reg extends uvm_reg;
       .volatile(1),
       .reset('h0000),
       .has_reset(1),
-      .is_rand(0),
+      .is_rand(1),
       .individually_accessible(1)
     );
     Reserved.set_compare(UVM_NO_CHECK);

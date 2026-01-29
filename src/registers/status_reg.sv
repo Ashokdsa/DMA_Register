@@ -1,6 +1,7 @@
 class status_reg extends uvm_reg;
   `uvm_object_utils(status_reg)
-  uvm_reg_field busy,done,error,paused,current_state,fifo_level,Reserved;
+  rand uvm_reg_field busy,done,error,paused,current_state,fifo_level;
+  rand uvm_reg_field Reserved;
 
   function new(string name = "status_reg");
     super.new(name,32,UVM_NO_COVERAGE);
@@ -16,7 +17,7 @@ class status_reg extends uvm_reg;
       .volatile(0),
       .reset('b0),
       .has_reset(1),
-      .is_rand(0),
+      .is_rand(1),
       .individually_accessible(1)
     );
     done = uvm_reg_field::type_id::create("done");
@@ -28,7 +29,7 @@ class status_reg extends uvm_reg;
       .volatile(0),
       .reset('b0),
       .has_reset(1),
-      .is_rand(0),
+      .is_rand(1),
       .individually_accessible(1)
     );
     error = uvm_reg_field::type_id::create("error");
@@ -40,7 +41,7 @@ class status_reg extends uvm_reg;
       .volatile(0),
       .reset('b0),
       .has_reset(1),
-      .is_rand(0),
+      .is_rand(1),
       .individually_accessible(1)
     );
     paused = uvm_reg_field::type_id::create("paused");
@@ -52,7 +53,7 @@ class status_reg extends uvm_reg;
       .volatile(0),
       .reset('b0),
       .has_reset(1),
-      .is_rand(0),
+      .is_rand(1),
       .individually_accessible(1)
     );
     current_state = uvm_reg_field::type_id::create("current_state");
@@ -64,7 +65,7 @@ class status_reg extends uvm_reg;
       .volatile(0),
       .reset('h0),
       .has_reset(1),
-      .is_rand(0),
+      .is_rand(1),
       .individually_accessible(1)
     );
     fifo_level = uvm_reg_field::type_id::create("fifo_level");
@@ -76,7 +77,7 @@ class status_reg extends uvm_reg;
       .volatile(0),
       .reset('h00),
       .has_reset(1),
-      .is_rand(0),
+      .is_rand(1),
       .individually_accessible(1)
     );
     Reserved = uvm_reg_field::type_id::create("Reserved");

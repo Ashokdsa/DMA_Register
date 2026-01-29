@@ -1,6 +1,6 @@
 class transfer_count_reg extends uvm_reg;
   `uvm_object_utils(transfer_count_reg)
-  uvm_reg_field transfer_count;
+  rand uvm_reg_field transfer_count;
 
   function new(string name = "transfer_count_reg");
     super.new(name,32,UVM_NO_COVERAGE);
@@ -16,7 +16,7 @@ class transfer_count_reg extends uvm_reg;
       .volatile(1),
       .reset('h00000000),
       .has_reset(1),
-      .is_rand(0),
+      .is_rand(1),
       .individually_accessible(1)
     );
     transfer_count.set_compare(UVM_NO_CHECK);

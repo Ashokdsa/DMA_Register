@@ -10,18 +10,18 @@ class ctrl_sequence extends dma_base_sequence;
     uvm_status_e status;
     $display("------------------------TESTING CONTROL REGISTER------------------------");
     val = val.find() with (item < 32'h00020000);
-    repeat(17) begin
+    if(rst)
+    begin
+      dma_model.ctrl.reset();
+      rst_compare(dma_model.ctrl,status);
+      rst = 0;
+    end
+    repeat(50) begin
       //RESET IF SEQUENCE IS CALLED ALONE
       $write("VAL = ");
       foreach(val[i])
         $write("%0h ",val[i]);
       $display();
-      if(rst)
-      begin
-        dma_model.ctrl.reset();
-        rst_compare(dma_model.ctrl,status);
-        rst = 0;
-      end
       dma_model.ctrl.peek(status,pread);
       $display("--------------------------------------------------------------------------\nINITIAL VALUE: FULL = %0h | start_dma(RW|1) = %0h w_count(RW|15) = %0h io_mem(RW|1) = %0h",pread[16:0],pread[0],pread[15:1],pread[16]);
       
@@ -29,12 +29,20 @@ class ctrl_sequence extends dma_base_sequence;
       idx = 0;
       while(written == pread)
       begin
-        written = val[idx];
-        if(idx >= val.size()) idx = 0;
-        else idx++;
+        if(val.size() > 0)
+        begin
+          written = val[idx];
+          if(idx >= val.size()) idx = 0;
+          else idx++;
+        end
+        else begin
+          //RANDOM INPUTS
+          dma_model.ctrl.randomize();
+          written = (dma_model.ctrl.start_dma.value) | (dma_model.ctrl.w_count.value << 1) | (dma_model.ctrl.io_mem.value << 16); 
+        end
       end
       if(idx > 0) val.delete(idx-1);
-      else val.delete(idx);
+      else if(val.size() > 0) val.delete(idx);
       
       $display("WRITING VALUE = %0h",written);
       dma_model.ctrl.write(status,written,UVM_FRONTDOOR);
@@ -48,13 +56,15 @@ class ctrl_sequence extends dma_base_sequence;
       else
         `uvm_error("CTRL REGISTER","IS NOT READ WRITE REGISTER")
 
+      //CHECKING FOR FRONTDOOR READ
       $display("--------------------------------------------------------------------------\nINITIAL VALUE: FULL = %0h | start_dma(RW|1) = %0h w_count(RW|15) = %0h io_mem(RW|1) = %0h",read[16:0],read[0],read[15:1],read[16]);
-      $display("POKING 32'h%0h INTO THE REGISTER");
-      //CHECK IF READ WORKS PROPERLY
+      $display("POKING 32'h%0h INTO THE REGISTER",written);
+
       dma_model.ctrl.poke(status,written);
       dma_model.ctrl.read(status,read,UVM_FRONTDOOR);
-      $display("AFTER READING %0h(LAST BIT BECOMES 0 AFTER WRITING 1): FULL = %0h | start_dma(RW|1) = %0h w_count(RW|15) = %0h io_mem(RW|1) = %0h",32'h1FFFF,read[16:0],read[0],read[15:1],read[16]);
-      if((read[31:1] != written[31:1]) && (read[0] != written[0]))
+
+      $display("AFTER READING %0h(LAST BIT BECOMES 0 AFTER WRITING 1): FULL = %0h | start_dma(RW|1) = %0h w_count(RW|15) = %0h io_mem(RW|1) = %0h",written,read[16:0],read[0],read[15:1],read[16]);
+      if(read[16:0] != written[16:0])
         `uvm_error("CTRL REGISTER","READ OPERATION DOES NOT WORK HERE")
       else
         `uvm_info("CTRL REGISTER","READ OPERATION WORKS HERE",UVM_LOW)

@@ -11,17 +11,17 @@ class error_status_sequence extends dma_base_sequence;
     uvm_status_e status;
     $display("------------------------TESTING ERROR STATUS REGISTER------------------------");
     val = val.find() with ((item[5]||item[6]||item[7]) == 1'b0);
-    repeat(29) begin
+    if(rst)
+    begin
+      dma_model.error_status.reset();
+      rst_compare(dma_model.error_status,status);
+      rst = 0;
+    end
+    repeat(50) begin
       $write("VAL = ");
       foreach(val[i])
         $write("%0h ",val[i]);
       $display();
-      if(rst)
-      begin
-        dma_model.error_status.reset();
-        rst_compare(dma_model.error_status,status);
-        rst = 0;
-      end
       dma_model.error_status.peek(status,pread);
       $display("--------------------------------------------------------------------------\nINITIAL VALUE: FULL = %0h | bus_error(RW1C|1) = %0h timeout_error(RW1C|1) = %0h alignment_error(RW1C|1) = %0h overflow_error(RW1C|1) = %0h underflow_error(RW1C|1) = %0h error_code(RO|8) = %0h error_addr_offset(RO|16) = %0h",pread,pread[0],pread[1],pread[2],pread[3],pread[4],pread[15:8],pread[31:16]);
       
@@ -29,12 +29,21 @@ class error_status_sequence extends dma_base_sequence;
       idx = 0;
       while(written == pread)
       begin
-        written = val[idx];
-        if(idx >= val.size()) idx = 0;
-        else idx++;
+        if(val.size() > 0)
+        begin
+          written = val[idx];
+          if(idx >= val.size()) idx = 0;
+          else idx++;
+        end
+        else begin
+          //RANDOM INPUTS
+          dma_model.error_status.randomize();
+          written = ((dma_model.error_status.bus_error.value) | (dma_model.error_status.timeout_error.value << 1) | (dma_model.error_status.alignment_error.value << 2) | (dma_model.error_status.overflow_error.value << 3) | (dma_model.error_status.underflow_error.value << 4) | (dma_model.error_status.error_code.value << 8) | (dma_model.error_status.error_addr_offset.value << 16)) & 32'hFFFFFF1F; 
+        end
       end
+
       if(idx != 0) val.delete(idx-1);
-      else val.delete(idx);
+      else if(val.size() > 0) val.delete(idx);
       
       $display("WRITING VALUE = %0h",written);
 
@@ -76,12 +85,14 @@ class error_status_sequence extends dma_base_sequence;
                      else `uvm_error("ERROR_STATUS.underflow_error","IS NOT A RW1C REGISTER")
     end
     //CHECK IF READ WORKS PROPERLY
-    $display("--------------------------------------------------------------------------\nINITIAL VALUE: FULL = %0h | bus_error(RW1C|1) = %0h timeout_error(RW1C|1) = %0h alignment_error(RW1C|1) = %0h overflow_error(RW1C|1) = %0h underflow_error(RW1C|1) = %0h error_code(RO|8) = %0h error_addr_offset(RO|16) = %0h",pread,pread[0],pread[1],pread[2],pread[3],pread[4],pread[15:8],pread[31:16]);
-    $display("POKING 32'hFFFFFF1F INTO THE REGISTER");
-    dma_model.error_status.poke(status,32'hFFFFFF1F);
+    $display("--------------------------------------------------------------------------\nINITIAL VALUE: FULL = %0h | bus_error(RW1C|1) = %0h timeout_error(RW1C|1) = %0h alignment_error(RW1C|1) = %0h overflow_error(RW1C|1) = %0h underflow_error(RW1C|1) = %0h error_code(RO|8) = %0h error_addr_offset(RO|16) = %0h",read,read[0],read[1],read[2],read[3],read[4],read[15:8],read[31:16]);
+    $display("POKING 32'h%0h INTO THE REGISTER",written);
+    dma_model.error_status.poke(status,written);
     dma_model.error_status.read(status,R1,UVM_FRONTDOOR);
-    $display("AFTER WRITING %0h: FULL = %0h | bus_error(RW1C|1) = %0h timeout_error(RW1C|1) = %0h alignment_error(RW1C|1) = %0h overflow_error(RW1C|1) = %0h underflow_error(RW1C|1) = %0h error_code(RO|8) = %0h error_addr_offset(RO|16) = %0h",written,R1,R1[0],R1[1],R1[2],R1[3],R1[4],R1[15:8],R1[31:16]);
-    if(R1 != 32'hFFFFFF1F)
+    $display("AFTER READING %0h: FULL = %0h | bus_error(RW1C|1) = %0h timeout_error(RW1C|1) = %0h alignment_error(RW1C|1) = %0h overflow_error(RW1C|1) = %0h underflow_error(RW1C|1) = %0h error_code(RO|8) = %0h error_addr_offset(RO|16) = %0h",written,R1,R1[0],R1[1],R1[2],R1[3],R1[4],R1[15:8],R1[31:16]);
+    if(R1 != written)
       `uvm_error("ERROR_STATUS REGISTER","READ OPERATION DOES NOT WORK HERE")
+    else
+      `uvm_info("ERROR_STATUS REGISTER","READ OPERATION WORKS HERE",UVM_LOW)
   endtask
 endclass

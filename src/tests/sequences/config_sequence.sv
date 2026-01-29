@@ -10,7 +10,7 @@ class config_sequence extends dma_base_sequence;
     uvm_status_e status;
     $display("------------------------TESTING CONFIGURATION REGISTER------------------------");
     val = val.find() with (item < 32'h00000200);
-    repeat(9) begin
+    repeat(50) begin
       //RESET IF SEQUENCE IS CALLED ALONE
       $write("VAL = ");
       foreach(val[i])
@@ -28,12 +28,20 @@ class config_sequence extends dma_base_sequence;
       idx = 0;
       while(written == pread)
       begin
-        written = val[idx];
-        if(idx >= val.size()) idx = 0;
-        else idx++;
+        if(val.size() > 0)
+        begin
+          written = val[idx];
+          if(idx >= val.size()) idx = 0;
+          else idx++;
+        end
+        else
+        begin
+          dma_model.configu.randomize();
+          written = (dma_model.configu.descriptor_mode.value << 8) | (dma_model.configu.data_width.value << 6) | (dma_model.configu.burst_size.value << 4) | (dma_model.configu.interrupt_enable.value << 3) | (dma_model.configu.auto_restart.value << 2) | (dma_model.configu.prioriti.value);
+        end
       end
       if(idx != 0) val.delete(idx-1);
-      else val.delete(idx);
+      else if(val.size() > 0)val.delete(idx);
       
       $display("WRITING VALUE = %0h",written);
       dma_model.configu.write(status,written,UVM_FRONTDOOR);
@@ -56,6 +64,6 @@ class config_sequence extends dma_base_sequence;
         `uvm_error("CONFIG REGISTER","READ OPERATION DOES NOT WORK HERE")
       else
         `uvm_info("CONFIG REGISTER","READ OPERATION WORKS HERE",UVM_LOW)
-      end
+    end
   endtask
 endclass

@@ -32,12 +32,20 @@ class transfer_count_sequence extends dma_base_sequence;
       idx = 0;
       while(written == pread)
       begin
-        written = val[idx];
-        if(idx >= val.size()) idx = 0;
-        else idx++;
+        if(val.size() > 0)
+        begin
+          written = val[idx];
+          if(idx >= val.size()) idx = 0;
+          else idx++;
+        end
+        else begin
+          //RANDOM INPUTS
+          dma_model.transfer_count.randomize();
+          written = dma_model.transfer_count.transfer_count.value;
+        end
       end
       if(idx != 0) val.delete(idx-1);
-      else val.delete(idx);
+      else if(val.size() > 0) val.delete(idx);
       
       $display("WRITING VALUE = %0h",written);
       dma_model.transfer_count.write(status,written,UVM_FRONTDOOR);
@@ -49,15 +57,16 @@ class transfer_count_sequence extends dma_base_sequence;
         `uvm_info("TRANSFER_COUNT","IS A READ ONLY REGISTER",UVM_LOW)
       else
         `uvm_error("TRANSFER_COUNT","IS NOT READ ONLY REGISTER")
-    end
-    $display("--------------------------------------------------------------------------\nINITIAL VALUE: transfer_count(RO|32) = %0h",pread);
 
-    $display("POKING 32'hFFFFFFFF INTO THE REGISTER");
-    //CHECK IF READ WORKS PROPERLY
-    dma_model.transfer_count.poke(status,32'hFFFFFFFF);
-    dma_model.transfer_count.read(status,read,UVM_FRONTDOOR);
-    $display("AFTER WRITING %0h: transfer_count(RO|32) = %0h",32'hFFFFFFFF,read);
-    if(read != 32'hFFFFFFFF)
-      `uvm_error("TRANSFER_COUNT REGISTER","READ OPERATION DOES NOT WORK HERE")
+      $display("--------------------------------------------------------------------------\nINITIAL VALUE: transfer_count(RO|32) = %0h",read);
+
+      $display("POKING 32'h%0h INTO THE REGISTER",written);
+      //CHECK IF READ WORKS PROPERLY
+      dma_model.transfer_count.poke(status,written);
+      dma_model.transfer_count.read(status,read,UVM_FRONTDOOR);
+      $display("AFTER READING %0h: transfer_count(RO|32) = %0h",written,read);
+      if(read != written)
+        `uvm_error("TRANSFER_COUNT REGISTER","READ OPERATION DOES NOT WORK HERE")
+    end
   endtask
 endclass
